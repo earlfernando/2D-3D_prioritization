@@ -351,13 +351,14 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     # df = pd.DataFrame.from_records(values, columns=headers)
     chunk_size = 10**4
     counter = 0
-    clf = RandomForestClassifier(n_estimators=100,max_features= 100,max_depth= 300,min_samples_split=100,min_samples_leaf=200,oob_score= True)
-    chunk = pd.read_csv(csv_file_location, header= 0)
-    X =chunk[create_headers(feature_length)]
-    print('loop')
-    y = chunk['label']
-    clf.fit(X, y)
-    print(clf.oob_score_)
+    clf = RandomForestClassifier(n_estimators=1000,warm_start=True,max_features= None,n_jobs=-1,max_depth= 300,min_samples_split=2,min_samples_leaf=20,oob_score= True)
+    for chunk in pd.read_csv(csv_file_location, header= 0, chunksize= chunk_size):
+        X =chunk[create_headers(feature_length)]
+        print('loop')
+        y = chunk['label']
+        clf.fit(X, y)
+        print(clf.oob_score_)
+        clf.n_estimators +=100
     return clf
     #pickle.dump(clf, open(file_name, 'wb'))
 
