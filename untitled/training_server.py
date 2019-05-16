@@ -398,9 +398,8 @@ def search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file
     for chunk in pd.read_csv(csv_file_location_kmeans, header =0, chunksize=chunk_size):
         X = chunk[create_headers(feature_length)]
         local_result=loaded_model.predict(X)
-        print(local_result)
-        np.append(result,local_result)
-    print(result)
+
+        result =np.append(result,local_result)
     for i in range(number_of_clusters):
         mask = result==i
         cost = np.sum(mask)
