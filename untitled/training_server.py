@@ -381,7 +381,7 @@ def k_means(headers,feature_length,csv_file_location,file_name,number_of_cluster
 
 def k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name,number_of_clusters):
     chunk_size = 10 **4
-    kmeans = MiniBatchKMeans(n_clusters=number_of_clusters,batch_size = chunk_size, max_iter=100,random_state= 42,verbose=True)
+    kmeans = MiniBatchKMeans(n_clusters=number_of_clusters,batch_size = 100, max_iter=100,random_state= 42,verbose=True)
     print("entering loop")
 
     for i, chunk in enumerate(pd.read_csv(csv_file_location_kmeans, header = 0, chunksize=chunk_size)):
