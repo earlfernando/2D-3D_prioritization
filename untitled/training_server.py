@@ -399,6 +399,7 @@ def search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file
         X = chunk[create_headers(feature_length)]
         local_result=loaded_model.predict(X)
         np.append(result,local_result)
+    print(result)
     for i in range(number_of_clusters):
         mask = result==i
         cost = np.sum(mask)
@@ -668,7 +669,7 @@ headers.append('label')
 #k_means(headers,feature_length,csv_file_location,file_name_kmeans)
 print("kmeans")
 print("random forest saved")
-k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+#k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 search_cost = search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 print(search_cost)
 #prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf)
