@@ -374,18 +374,20 @@ def k_means(headers,feature_length,csv_file_location,file_name,number_of_cluster
     chunk_size = 10 **3
     kmeans = KMeans(n_clusters=10000, max_iter=10)
     c=0
-    for chunk in pd.read_csv(csv_file_location, names=headers, chunksize=chunk_size):
+    for chunk in pd.read_csv(csv_file_location, header=0, chunksize=chunk_size):
         X = chunk[create_headers(feature_length)]
         kmeans.fit(X)
 
 
 def k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name,number_of_clusters):
-    chunk_size = 10 **3
+    chunk_size = 10 **4
     kmeans = MiniBatchKMeans(n_clusters=number_of_clusters,batch_size = chunk_size, max_iter=100,random_state= 42,verbose=True)
     print("entering loop")
-    for i, chunk in enumerate(pd.read_csv(csv_file_location_kmeans, names=0, chunksize=chunk_size)):
+
+    for i, chunk in enumerate(pd.read_csv(csv_file_location_kmeans, header = 0, chunksize=chunk_size)):
         X = chunk[create_headers(feature_length)]
         kmeans.partial_fit(X)
+        print(i)
     pickle.dump(kmeans, open(file_name, 'wb'))
 
 def search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file_name,number_of_clusters):
@@ -393,7 +395,7 @@ def search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file
     loaded_model = pickle.load(open(file_name, 'rb'))
     result = []
     search_cost =[]
-    for chunk in pd.read_csv(csv_file_location_kmeans, names=0, chunksize=chunk_size):
+    for chunk in pd.read_csv(csv_file_location_kmeans, header =0, chunksize=chunk_size):
         X = chunk[create_headers(feature_length)]
         local_result=loaded_model.predict(X)
         np.append(result,local_result)
