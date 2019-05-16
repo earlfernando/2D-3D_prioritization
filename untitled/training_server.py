@@ -19,10 +19,10 @@ image_bin_location = "/home/earl/Thesis/GreatCourt/images.bin"
 csv_file_location = "/home/earlfernando/training/training_Data_RandomForest.csv"
 
 file_name_random_forest = "/home/earlfernando/training/test_model_random_forest_2.sav"
-#file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
+file_name_kmeans = "/home/earlfernando/training//test_model_kmeans.sav"
 feature_length =128
-#csv_file_location_kmeans= "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
-#number_of_clusters = 10000
+csv_file_location_kmeans= "/home/earlfernando/training/train_kmeans.csv"
+number_of_clusters = 10000
 #database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 #image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
 #point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
@@ -351,14 +351,19 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     # df = pd.DataFrame.from_records(values, columns=headers)
     chunk_size = 10**4
     counter = 0
-    clf = RandomForestClassifier(n_estimators=1000,warm_start=True,max_features= None,n_jobs=-1,max_depth= 300,min_samples_split=2,min_samples_leaf=20,oob_score= True)
-    for chunk in pd.read_csv(csv_file_location, header= 0, chunksize= chunk_size):
+    clf = RandomForestClassifier(n_estimators=10000,warm_start=True,max_features= None,n_jobs=-1,min_samples_leaf=100,oob_score= True)
+    for i,chunk in enumerate(pd.read_csv(csv_file_location, header= 0, chunksize= chunk_size)):
         X =chunk[create_headers(feature_length)]
-        print('loop')
+        print(i)
         y = chunk['label']
         clf.fit(X, y)
+        if i <=30:
+            trees = 1000
+        else:
+            trees = 200
+
         print(clf.oob_score_)
-        clf.n_estimators +=100
+        clf.n_estimators += trees
     return clf
     #pickle.dump(clf, open(file_name, 'wb'))
 
@@ -376,9 +381,9 @@ def k_means(headers,feature_length,csv_file_location,file_name,number_of_cluster
 
 def k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name,number_of_clusters):
     chunk_size = 10 **3
-    kmeans = MiniBatchKMeans(n_clusters=number_of_clusters,batch_size = chunk_size, max_iter=10)
+    kmeans = MiniBatchKMeans(n_clusters=number_of_clusters,batch_size = chunk_size, max_iter=100,random_state= 42,verbose=True)
     print("entering loop")
-    for chunk in pd.read_csv(csv_file_location_kmeans, names=0, chunksize=chunk_size):
+    for i, chunk in enumerate(pd.read_csv(csv_file_location_kmeans, names=0, chunksize=chunk_size)):
         X = chunk[create_headers(feature_length)]
         kmeans.partial_fit(X)
     pickle.dump(kmeans, open(file_name, 'wb'))
@@ -555,10 +560,10 @@ def prediction_forest (headers,feature_length,csv_file_location_test,file_name_r
 
         for number, prob in enumerate(forest_result_local):
                 total +=1
-                truth = y[number]
+                truth = y[0][number]
                 classified = forest_result_class[number]
-                prob_positive = prob[0]
-                prob_negative = prob[1]
+                prob_positive = prob[1]
+                prob_negative = prob[0]
                 positve_index = int(prob_positive*10)
                 negative_index = int(prob_negative*10)
                 if truth == 1:
@@ -656,13 +661,13 @@ print('all the csv files are ready')
 headers = create_headers(feature_length)
 headers.append('label')
 ###
-clf=random_forest_chunks(headers,feature_length,csv_file_location,file_name_random_forest )
-#k_means(headers,feature_length,csv_file_location,file_name)
+#clf=random_forest_chunks(headers,feature_length,csv_file_location,file_name_random_forest )
+#k_means(headers,feature_length,csv_file_location,file_name_kmeans)
 print("kmeans")
 print("random forest saved")
-#k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 #search_cost = search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
-prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf)
+#prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf)
 
 
 #best_cost =prediction (headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
