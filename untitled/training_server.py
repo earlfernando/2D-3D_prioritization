@@ -403,6 +403,7 @@ def search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file
         mask = result==i
         cost = np.sum(mask)
         search_cost.append(cost)
+    return search_cost
 
 
 def test_images_string():
@@ -669,6 +670,7 @@ print("kmeans")
 print("random forest saved")
 k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 search_cost = search_cost_calculation(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+print(search_cost)
 #prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf)
 
 
