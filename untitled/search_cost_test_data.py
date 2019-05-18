@@ -27,34 +27,27 @@ with open(images_test_file_location,'r') as data:
             #shutil.move(actual_location,location_to_move)
 print(test_images)"""
 
-prob=[]
-label =[]
-for  i in range (100):
-    prob.append(random.uniform(0, 1))
-    label.append(random.randint(0,1))
-print(prob)
-print(label)
-positive = np.zeros(10)
-negative = np.zeros(10)
-positive_truth = np.zeros(10)
-negative_truth = np.zeros(10)
-for i,j in enumerate(prob):
-    classified = label[i]
-    truth = random.randint(0,1)
-    if truth == 1:
-        index = int(j*10)
 
-        positive_truth[index]+=1
-        if truth==classified:
-            positive[index]+=1
-    if truth ==0:
-        index = int(j*10)
-        negative_truth[index]+=1
-        if truth == classified:
-            negative[index]+=1
-print(positive,positive_truth)
-accuracy_positve = np.divide(positive,positive_truth)
-accuracy_negative = np.divide(negative,negative_truth)
+positive =[     0,      0,      0,     0,      0, 332447,133521,   5081,      0,
+      0]
+negative = [     0,     0,      0,      0,      0, 773928, 308695, 135575,  44742,
+   1766]
+positive_truth =[1.00000e+00, 2.01000e+02 ,3.11600e+03, 2.45400e+04 ,1.43622e+05, 3.32447e+05,
+                  1.33521e+05, 5.08100e+03 ,0.00000e+00, 0.00000e+00]
+negative_truth= [     0,   0,   3310, 171964, 862628, 773928, 308695, 135575,  44742,
+   1766]
+accuracy_negative=[]
+accuracy_positve=[]
+for i in range(10):
+    if positive[i]:
+        accuracy_positve.append(positive[i]/positive_truth[i])
+    else :
+        accuracy_positve.append(0)
+    if negative[i] >0:
+        accuracy_negative.append(negative[i]/negative_truth[i])
+    else :
+        accuracy_negative.append(0)
+
 x_axis= np.arange(10)
 x_axis =x_axis/10
 fig ,ax = plt.subplots()
@@ -63,7 +56,7 @@ line2 = ax.plot(x_axis,accuracy_negative,label ='negative')
 ax.legend()
 plt.xlabel('probability from random forest')
 plt.ylabel('percentage of matches')
-plt.title('Random_forest n_estimator =1000 , max_features = number of features')
+plt.title('Random_forest n_estimator =1,added_estimator = 1 , max_features = number of features')
 plt.show()
 
 

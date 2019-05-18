@@ -12,5 +12,5 @@ def FPTAS(number, capacity, weight_cost, scaling_factor=4):
     :return: tuple like: (best cost, best combination list(contains 1 and 0))
     """
     new_capacity = int(float(capacity) / scaling_factor)
-    new_weight_cost = [(round(float(weight) / scaling_factor) + 1, cost) for weight, cost in weight_cost]
+    new_weight_cost = [(float(weight) / scaling_factor , cost) for weight, cost in weight_cost]
     return dynamic_programming(number, new_capacity, new_weight_cost)

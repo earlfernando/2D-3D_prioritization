@@ -1,5 +1,5 @@
 #coding: utf-8
-
+import numpy as np
 
 def ratio_greedy(number, capacity, weight_cost):
     """Greedy 1/0 ratio method for solving knapsack problem
@@ -10,13 +10,15 @@ def ratio_greedy(number, capacity, weight_cost):
     :return: tuple like: (best cost, best combination list(contains 1 and 0))
     """
     ratios = [(index, item[1] / float(item[0])) for index, item in enumerate(weight_cost)]
-    ratios = sorted(ratios, key=lambda x: x[1])
+    weight_cost = np.array(weight_cost)
+    print(weight_cost[:,1])
+    ratios = sorted(ratios, key=lambda x: x[1],reverse=True)
     best_combination = [0] * number
     best_cost = 0
     weight = 0
     for index, ratio in ratios:
         if weight_cost[index][0] + weight <= capacity:
             weight += weight_cost[index][0]
-            best_cost += weight_cost[index][1]
+            best_cost += 1
             best_combination[index] = 1
     return best_cost, best_combination
