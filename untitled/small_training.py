@@ -363,7 +363,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     clf.fit(data.values,chunk['label'])
     print(clf.feature_importances_)
     print(selected_columns)
-    #pickle.dump(clf, open(file_name, 'wb'))
+    pickle.dump(clf, open(file_name, 'wb'))
 
     return clf,selected_columns
 
@@ -612,14 +612,16 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     forest_model = clf
     # forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     result_forest = []
-    positive = np.zeros(10)
-    negative = np.zeros(10)
-    positive_truth = np.zeros(10)
-    negative_truth = np.zeros(10)
+    number_axis = 11
+    positive = np.zeros(number_axis)
+    negative = np.zeros(number_axis)
+    positive_truth = np.zeros(number_axis)
+    negative_truth = np.zeros(number_axis)
     total = 0
     model_accuracy = 0
     chunk_accuracy = 0
     chunk_total = 0
+    sum=0
     print(selected_col)
     for chunk in pd.read_csv(csv_file_location_test, header=0, chunksize=chunk_size):
         X=chunk[selected_col]
@@ -627,9 +629,16 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         forest_result_class = forest_model.predict(X)
 
         forest_result_local = forest_model.predict_proba(X)
-        numpy_local = np.array(forest_result_local)
+
+        numpy_local = np.array(forest_result_class)
+        if np.argmax(forest_result_local,axis=1).all() == numpy_local.all():
+            print('true')
+        else:
+            print(np.argmax(forest_result_local,axis=1),numpy_local)
+            print('false')
         y = np.transpose(y)
-        print(y)
+        sum+= np.sum(y)
+        forest_result_local = forest_result_local*100
         array = forest_result_class == y
         chunk_accuracy += np.count_nonzero(forest_result_class == y)
         chunk_total += np.shape(forest_result_class)[0]
@@ -639,28 +648,37 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
 
             total += 1
             truth = y[number]
-            classified = forest_result_class[number]
-            prob_positive = prob[1]
-            prob_negative = prob[0]
-            positve_index = int(round(prob_positive * 10))-1
-            negative_index = int(round(prob_negative * 10))-1
+            classified = np.argmax(prob)
+            if classified==0:
+                classified=1
+            elif classified ==1:
+                classified=0
+            prob_positive = prob[0]
+            prob_negative = prob[1]
+            positve_index = int(round(prob_positive /10))
+            negative_index = int(round(prob_negative / 10))
             if truth == 1:
 
                 positive_truth[positve_index] += 1
                 if truth == classified:
                     positive[positve_index] += 1
+
                     model_accuracy += 1
             if truth == 0:
                 negative_truth[negative_index] += 1
                 if truth == classified:
                     negative[negative_index] += 1
-                    model_accuracy += 1
 
+
+                    model_accuracy += 1
+     # print(prob/10,'positive',classified,truth,np.argmax(prob))
+    # print(prob/10,'negative',classified,truth,np.argmax(prob))
     print(model_accuracy / total, total)
     print(positive, negative, positive_truth, negative_truth)
     accuracy_negative = []
     accuracy_positve = []
-    for i in range(10):
+    print(sum)
+    for i in range(number_axis):
         if positive[i]:
             accuracy_positve.append(positive[i] / positive_truth[i])
         else:
@@ -669,7 +687,7 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
             accuracy_negative.append(negative[i] / negative_truth[i])
         else:
             accuracy_negative.append(0)
-    x_axis = np.arange(10)
+    x_axis = np.arange(number_axis)
     x_axis = x_axis / 10
 
     fig, ax = plt.subplots()
@@ -827,7 +845,7 @@ print('all the csv files are ready')
 headers = create_headers(feature_length)
 headers.append('label')
 ###
-clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
+#clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
 # k_means(headers,feature_length,csv_file_location,file_name)
 selected_columns = ['1', '2', '3' ,'4' ,'5' ,'7' ,'8' ,'12' ,'15' ,'16' ,'19' ,'20' ,'21' ,'24', '28', '38', '49', '66' ,'81', '95']
 print("kmeans")
@@ -836,7 +854,7 @@ print("random forest saved")
 #search_cost = search_cost_calculation(headers, feature_length, csv_file_location_kmeans, file_name_kmeans, number_of_clusters)
 
 # print(search_cost)
-#clf = pickle.load(open(file_name_random_forest, 'rb'))
+clf = pickle.load(open(file_name_random_forest, 'rb'))
 
 prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf,file_name= file_name_random_forest,selected_col=selected_columns)
 #prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
