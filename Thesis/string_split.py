@@ -12,14 +12,25 @@ nvm_file_location = "/home/earl/Thesis/GreatCourt/reconstruction.nvm"
 image_file_text_location ="/home/earl/Thesis/local_tmp/image_input.txt"
 image_file_text_location1 ="/home/earl/Thesis/GreatCourt/image_input.txt"
 dir_for_counting= "/home/earl/Thesis/GreatCourt/"
-database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
+database_locatiom = "/home/earl/Thesis/GreatCourt/Sequence_Database_greatCourt.db"
 camera_write_text_file_location = "/home/earl/Thesis/GreatCourt/cameras_input_for_triangulate.txt"
 image_write_text_file_location = "/home/earl/Thesis/GreatCourt/image_input_for_triangulate.txt"
 new_nvm_file_location =  "/home/earl/Thesis/GreatCourt/reconstruction_new.nvm"
 
+def test_images_string():
+    images_test_file_location = "/home/earl/Thesis/GreatCourt/dataset_test.txt"
+    test_images = []
+    with open(images_test_file_location, 'r') as data:
+        for line in data:
+            if line.startswith("se"):
+                split_data = line.split(' ')
+                # actual_location = images_location+'/'+split_data[0]
+                test_images.append(split_data[0])
+    return test_images
+
 
 #Methods
-def image_dir_counting(dir,sequence,image_data):
+def image_dir_counting(dir,sequence,image_data,database_location):
     r = []
     file_count =0
     sequence = np.array(sequence)
@@ -28,6 +39,24 @@ def image_dir_counting(dir,sequence,image_data):
     sorted_sequence = []
     camera_id =0
     sorted_image_data =[]
+    database = sqlite3.connect(database_location)
+    cursor = database.cursor()
+    test_images_id = []
+    training_images_id = []
+
+    test_images_str = test_images_string()
+    cursor.execute('''SELECT image_id,name FROM IMAGES ''')
+    for row in cursor:
+        """image_name = row[1].split('/')
+        if image_name[0]=='test':
+            test_images_id.append(row[0])"""
+        if row[1] in test_images_str:
+            test_images_id.append(row[0])
+        else:
+            training_images_id.append(row[0])
+    database.close()
+    print('test images obtrained')
+
     for root, dirs, files in os.walk(dir):
         for name in sorted(dirs):
             if name == 'videos':
@@ -35,14 +64,19 @@ def image_dir_counting(dir,sequence,image_data):
             local_path =os.path.join(root, name)
             path, directories, images = next(os.walk(local_path))
             for image in sorted(images):
-                camera_id +=1
-                local_image_name = name+'/'+image
-                image_index = np.where(sequence==local_image_name)
-                if len(image_index)!=1:
-                    print("error")
-                sorted_image_data.append(image_data[image_index])
-                camera_id_array.append(camera_id)
-                sorted_sequence.append(local_image_name)
+                camera_id += 1
+                local_image_name = local_image_name = name+'/'+image
+                if local_image_name in test_images_str:
+                    print(image)
+                else:
+
+                    local_image_name = name+'/'+image
+                    image_index = np.where(sequence==local_image_name)
+                    if len(image_index)!=1:
+                        print("error")
+                    sorted_image_data.append(image_data[image_index])
+                    camera_id_array.append(camera_id)
+                    sorted_sequence.append(local_image_name)
             file_count += len(images)
     return file_count, sorted_image_data,sorted_sequence,camera_id_array
 
@@ -86,7 +120,7 @@ def split(write_nvm=False):
                     seqence.append(split_data[0])
                     image_data.append(split_data[1:len(split_data)])
                     #seqence.append(split_data[0].replace('.jpg','.png'))
-        with open(image_file_text_location,'w') as image_file_text :
+        with open(image_file_text_location1,'w') as image_file_text :
             for sequence_location,image_name in enumerate(seqence):
                 write_image_seqence(image_file_text, sequence_location, image_name,seqence)
         if write_nvm:
@@ -170,16 +204,20 @@ def get_details_from_database():
     cursor =database.cursor()
 
     cursor.execute('''SELECT image_id,camera_id,name FROM images''')
+    test_images_str = test_images_string()
 
     with open(image_write_text_file_location,'w+') as image_write:
             with open(camera_write_text_file_location,'w+') as camera_write:
                 for row in cursor:
+                    if row[2] in test_images_str:
 
-                    camera_write.write(str( row[2])+'\n')
-                    if row[1] != row[0]:
-                       print(row[1])
-                    image_write.write(str(row[2]
-                                          )+' '+str(row[0])+' '+str(row[1])+'\n')
+                        continue
+                    else:
+                        camera_write.write(str( row[2])+'\n')
+                        if row[1] != row[0]:
+                           print(row[1])
+                        image_write.write(str(row[2]
+                                              )+' '+str(row[0])+' '+str(row[1])+'\n')
     database.close()
 
 
@@ -258,6 +296,13 @@ def writing_as_per_distance_and_angle(sequence,image_data):
             local_string = sequence[id] + ' ' + sequence[i] + '\n'
             image_file_text.write(local_string)
 
+def writing_as_per_location(sequence,image_data):
+
+    with open(image_file_text_location1, 'w') as image_file_text:
+     for id, image_name in enumerate(sequence):
+            print(image_name,id)
+            write_image_seqence(image_file_text,id,image_name,sequence)
+
 
 
 
@@ -319,8 +364,9 @@ def quaterion_angle(loca_quater,overall_quaterion,id):
 #Main loop
 sequence, image_data =split(write_nvm=True)
 file_count, sorted_image_data, sorted_sequence, camera_id_array = image_dir_counting(dir_for_counting,
-                                                                                     sequence,image_data)
-writing_as_per_distance_and_angle(sequence,image_data)
+                                                                                     sequence,image_data,database_locatiom)
+writing_as_per_location(sequence,image_data)
+#writing_as_per_distance_and_angle(sequence,image_data)
 #database_change(sorted_image_data,sorted_sequence,camera_id_array,database_locatiom)
 get_details_from_database()
 

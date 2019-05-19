@@ -36,7 +36,7 @@ number_of_clusters = 10000
 database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
 point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-csv_file_location_kmeans_test = "/home/earl/Thesis/GreatCourt/test_kmeans.csv"
+csv_file_location_kmeans_test = "/home/earl/Thesis/GreatCourt/test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -227,8 +227,8 @@ def handle_data(positive, negative, feature_length, csv_file_location):
     print('data_handling')
     headers = create_headers(feature_length)
     headers.append('label')
-    positive = random.sample(positive, 10000)
-    negative = random.sample(negative, 10000)
+    #positive = random.sample(positive, 10000)
+    #negative = random.sample(negative, 10000)
     print(np.shape(positive)[0], np.shape(negative)[0])
 
     positive_label = np.ones((np.shape(positive)[0], 1))
@@ -328,7 +328,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     # df = pd.DataFrame.from_records(values, columns=headers)
     chunk_size = 10 ** 4
     counter = 0
-    clf = RandomForestClassifier(n_estimators=1000,max_features=None,random_state= 42,max_depth=10,n_jobs=-1)
+    clf = RandomForestClassifier(n_estimators=1000,max_features=None,random_state= 42,max_depth=10,n_jobs=-1,oob_score=True)
     #clf = RandomForestClassifier(n_estimators=1000,max_features=None,min_samples_leaf=10,max_depth=100,n_jobs=-1,oob_score= True,random_state= 42)
     chunk =pd.read_csv(csv_file_location)
     #X= chunk[create_headers(feature_length)]
@@ -489,6 +489,7 @@ def make_test_data(points3D_location, database_location):
                     image_class = image_array[common - 1]
                     descriptor = image_class.poistive_descriptor[index - 1]
                     test_data_positive.append(descriptor)
+            """
             else:
 
                 location = test_common[0]
@@ -502,7 +503,7 @@ def make_test_data(points3D_location, database_location):
 
                 image_class = image_array[location - 1]
                 descriptor = image_class.poistive_descriptor[index - 1]
-                test_data_negative.append(descriptor)
+                test_data_negative.append(descriptor)"""
     """
         else :
             for location in range(1,len(images_with_3d)+1):
@@ -820,10 +821,10 @@ def handle_data_for_test_image(positive,feature_length,csv_file_location_kmeans)
     return headers
 
 
-#cameras =read_images_binary(image_bin_location)
+cameras =read_images_binary(image_bin_location)
 
 # image_array = get_details_from_database()
-#image_array =add_feature_location(database_locatiom)
+image_array =add_feature_location(database_locatiom)
 
 
 print('task1 complete')
@@ -832,10 +833,10 @@ print('task2 complete')
 
 #headers=handle_data(positive,negative,feature_length,csv_file_location_400000)
 print('3')
-# headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
+#headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
-# test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom)
-# headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
+test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom)
+headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
 print('all the csv files are ready')
 
 #test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
@@ -845,7 +846,7 @@ print('all the csv files are ready')
 headers = create_headers(feature_length)
 headers.append('label')
 ###
-#clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
+clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
 # k_means(headers,feature_length,csv_file_location,file_name)
 selected_columns = ['1', '2', '3' ,'4' ,'5' ,'7' ,'8' ,'12' ,'15' ,'16' ,'19' ,'20' ,'21' ,'24', '28', '38', '49', '66' ,'81', '95']
 print("kmeans")
