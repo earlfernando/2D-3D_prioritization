@@ -1,7 +1,9 @@
 # Prioritized 2D-3D Matching for Visual Localization Revisited
+
 *Earl Fernando 
 *Master's in Complex Adaptive Systems
 *Chalmers University of Technology
+
 ## Abstract
 Estimating the position and orientation from which an image was taken with respect
 to some scene representation is one of the main topics of research in the field of
