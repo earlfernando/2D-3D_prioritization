@@ -1,8 +1,8 @@
 # Prioritized 2D-3D Matching for Visual Localization Revisited
 
-*Earl Fernando 
-*Master's in Complex Adaptive Systems
-*Chalmers University of Technology
+* Earl Fernando 
+* Master's in Complex Adaptive Systems
+* Chalmers University of Technology
 
 ## Abstract
 Estimating the position and orientation from which an image was taken with respect
