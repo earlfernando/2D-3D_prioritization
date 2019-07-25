@@ -13,6 +13,12 @@ from fptas import FPTAS
 from operator import itemgetter
 import random
 import matplotlib.pyplot as plt
+from sklearn.tree import export_graphviz
+from sklearn.externals.six import StringIO
+from IPython.display import Image
+import matplotlib.image as mpimg
+from subprocess import call
+import pydotplus
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
@@ -328,7 +334,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     # df = pd.DataFrame.from_records(values, columns=headers)
     chunk_size = 10 ** 4
     counter = 0
-    clf = RandomForestClassifier(n_estimators=1000,max_features=None,random_state= 42,max_depth=10,n_jobs=-1,oob_score=True)
+    clf = RandomForestClassifier(n_estimators=1000,max_features=None,random_state= 42,max_depth=10,n_jobs=-1,oob_score=True,class_weight= "balanced",bootstrap= True)
     #clf = RandomForestClassifier(n_estimators=1000,max_features=None,min_samples_leaf=10,max_depth=100,n_jobs=-1,oob_score= True,random_state= 42)
     chunk =pd.read_csv(csv_file_location)
     #X= chunk[create_headers(feature_length)]
@@ -342,8 +348,8 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     data = chunk.iloc[:, 0:-1]
 
     corr =data.corr()
-    sns.heatmap(corr)
-    plt.show()
+    #sns.heatmap(corr)
+    #plt.show()
     columns = np.full((corr.shape[0],), True, dtype=bool)
     for i in range(corr.shape[0]):
         for j in range(i + 1, corr.shape[0]):
@@ -361,8 +367,27 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     data = pd.DataFrame(data=data_modeled, columns=selected_columns)
 
     clf.fit(data.values,chunk['label'])
-    print(clf.feature_importances_)
-    print(selected_columns)
+    #print(clf.feature_importances_)
+    print(clf.oob_score_)
+    #print(selected_columns)
+    dot_data = StringIO()
+    """
+    for i in range (1000):
+        estimators = clf.estimators_[i]
+
+        export_graphviz(estimators, out_file="tree.dot",
+                        feature_names=selected_columns,
+                        class_names=["1","0"],
+                        rounded=True, proportion=False,
+                        precision=2, filled=True)
+        print('loop')
+        call(['dot', '-Tpng', 'tree.dot', '-o', 'tree.png', '-Gdpi=600'])
+        img = mpimg.imread('tree.png')
+        imgplot = plt.imshow(img)
+        plt.show()"""
+  #  print(clf.decision_path(data.values))
+    
+
     pickle.dump(clf, open(file_name, 'wb'))
 
     return clf,selected_columns
@@ -821,10 +846,10 @@ def handle_data_for_test_image(positive,feature_length,csv_file_location_kmeans)
     return headers
 
 
-cameras =read_images_binary(image_bin_location)
+#cameras =read_images_binary(image_bin_location)
 
 # image_array = get_details_from_database()
-image_array =add_feature_location(database_locatiom)
+#image_array =add_feature_location(database_locatiom)
 
 
 print('task1 complete')
@@ -835,8 +860,8 @@ print('task2 complete')
 print('3')
 #headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
-test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom)
-headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
+#test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom)
+#headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
 print('all the csv files are ready')
 
 #test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
