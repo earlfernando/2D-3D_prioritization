@@ -1041,7 +1041,7 @@ for feature in range(3):
     for n in N:
         for max_dept in max_depth:
             for min in min_leaf_nodes:
-                print("N={],Max_depth={},min_leaf={},feature={}".format(n,max_dept,min,feature))
+                print("N={},Max_depth={},min_leaf={},feature={}".format(n,max_dept,min,feature))
                 save_location= save_location+'/'
                 save_location_local= save_location + 'N=' + str(n) + 'max_depth=' + str(max_dept) + 'min_leaf=' + str(min)
                 save_location_forest = save_location_local+'.sav'
