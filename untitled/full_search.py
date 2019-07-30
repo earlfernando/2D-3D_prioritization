@@ -355,7 +355,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
                                  oob_score=True, class_weight="balanced", bootstrap=True)
     # clf = RandomForestClassifier(n_estimators=1000,max_features=None,max_depth=10,n_jobs=-1,oob_score= True,random_state= 42)
     chunk = pd.read_csv(csv_file_location)
-    np.random.see(123)
+    np.random.seed(123)
     chunk = shuffle(chunk)
 
     if feature_mode ==0:
@@ -1027,12 +1027,12 @@ print('all the csv files are ready')
 ###remove this
 headers = create_headers(feature_length)
 headers.append('label')
-#N = [100, 500, 1000, 1500]
-#max_depth = [10, 100, 300, 1000]
-#min_leaf_nodes = [1, 3, 10, 20]
-N =[1000]
-max_depth = [10]
-min_leaf_nodes =[1]
+N = [100, 500, 1000, 1500]
+max_depth = [10, 100, 300, 1000]
+min_leaf_nodes = [1, 3, 10, 20]
+#N =[1000]
+#max_depth = [10]
+#min_leaf_nodes =[1]
 accuracy_list=[['N','max_depth','min_samples_leaf','accuracy','time']]
 for feature in range(3):
     if feature <=1:
