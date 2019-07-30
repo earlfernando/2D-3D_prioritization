@@ -799,7 +799,7 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
 
         forest_result_local = forest_model.predict_proba(X)
 
-        numpy_local = np.array(forest_result_class)
+        #numpy_local = np.array(forest_result_class)
         """if np.argmax(forest_result_local,axis=1).all() == numpy_local.all():
             print('true')
         else:
@@ -808,10 +808,10 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         y = np.transpose(y)
         sum += np.sum(y)
         forest_result_local = forest_result_local * 100
-        array = forest_result_class == y
+        #array = forest_result_class == y
         chunk_accuracy += np.count_nonzero(forest_result_class == y)
         chunk_total += np.shape(forest_result_class)[0]
-        print(chunk_accuracy / chunk_total, 'size', np.shape(forest_result_class)[0], 'chunk acc', chunk_accuracy)
+        #print(chunk_accuracy / chunk_total, 'size', np.shape(forest_result_class)[0], 'chunk acc', chunk_accuracy)
 
         for number, prob in enumerate(forest_result_local):
             total += 1
@@ -842,7 +842,6 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     print(model_accuracy / total, total)
     accuracy_negative = []
     accuracy_positve = []
-    print(sum)
     for i in range(number_axis):
         if local_positive[i]:
             accuracy_positve.append(local_positive[i] / local_prob_positive[i])
@@ -1042,6 +1041,7 @@ for feature in range(3):
     for n in N:
         for max_dept in max_depth:
             for min in min_leaf_nodes:
+                print("N={],Max_depth={},min_leaf={},feature={}".format(n,max_dept,min,feature))
                 save_location= save_location+'/'
                 save_location_local= save_location + 'N=' + str(n) + 'max_depth=' + str(max_dept) + 'min_leaf=' + str(min)
                 save_location_forest = save_location_local+'.sav'
