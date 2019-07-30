@@ -13,6 +13,8 @@ from fptas import FPTAS
 from operator import itemgetter
 import random
 import matplotlib.pyplot as plt
+import  time
+from sklearn.utils import shuffle
 from sklearn.tree import export_graphviz
 from sklearn.externals.six import StringIO
 from IPython.display import Image
@@ -30,7 +32,6 @@ from  sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-
 database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earl/Thesis/GreatCourt/images.bin"
 csv_file_location_400000 = "/home/earl/Thesis/GreatCourt/training_Data_RandomForest_10000.csv"
@@ -375,6 +376,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     #y = chunk['label']
     #clf.fit(X, y)
     np.random.seed(123)
+    chunk = shuffle(chunk)
     data = chunk.iloc[:, 0:-1]
     corr =data.corr()
     #sns.heatmap(corr)
@@ -753,7 +755,90 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     plt.title('Random_forest n_estimator =1000 , max_features = number of features')
     plt.show()
     pickle.dump(clf, open(file_name, 'wb'))
+    
+    
 """
+
+def add_descriptors_to_image_array(image_array,cameras):
+    for rand, cam in enumerate(cameras):
+
+
+        for h, k in enumerate(cameras[cam].point3D_ids):
+
+            if k >= 0:
+
+                id = cameras[cam].xys[h]
+                image_array[cam - 1].add_positve(id[0], id[1])
+
+        #image_array[cam - 1].add_negative()
+    return image_array
+
+
+def final_predict (feature_length,test_data_location,file_name_random_forest,file_name_kmeans,search_cost,capacity,selected_columns,image_array,N):
+    forest_model = pickle.load(open(file_name_random_forest, 'rb'))
+    kmeans_model = pickle.load(open(file_name_kmeans,'rb'))
+    best_costs = np.zeros(4)
+    time_track = np.zeros(3)
+    list_cost =[]
+    ###parameter for pareto optimal
+    max_limit_pareto = np.amax(search_cost) * 0.2
+    ## creating loop of the image_Array
+    headers = create_headers(feature_length)
+    number_of_test_images =0
+    for image in image_array:
+        if image.train_test ==1:
+            number_of_test_images +=1
+            #making data frame
+            image_Data_frame = pd.DataFrame(image.poistive_descriptor, columns=headers)
+            X= image_Data_frame[selected_columns]
+            X_kmeans = image_Data_frame[headers]
+            #prediction
+            result_kmeans = kmeans_model.predict(X_kmeans)
+            result_forest = forest_model.predict_proba(X)
+            #make search cost
+            actual_cost = []
+            for i in result_kmeans:
+                actual_cost.append(search_cost[int(i)])
+            total_cost = np.sum(actual_cost)
+            #combine for prioritization
+            list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
+            time_greedy_start = time.time()
+            best_cost_greedy, _, _ = greedy_mine(N, capacity=capacity, weight_cost=list_for_prioritization)
+            time_greedy_end = time.time()
+            time_fptas_start =time.time()
+            best_cost_fptas, _ = FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization, list_limit= N,
+                                       scaling_factor=100)
+            time_fptas_end = time.time()
+            pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, N, max_limit_pareto)
+            pareto_optimal_search_cost = pareto_optimal_solution[-1][1]
+            time_ranking_start= time.tine()
+            best_cost_ranking = average_ranking(N, list_prioritizatoin=list_for_prioritization,capacity=capacity)
+            time_ranking_end = time.time()
+            ### first greedy, then fptas then ranking, then pareto
+            best_costs+=np.array([best_cost_greedy,best_cost_fptas,best_cost_ranking,pareto_optimal_search_cost])
+            time_track+= np.array([time_greedy_end-time_greedy_start,time_fptas_end-time_fptas_start,time_ranking_end-time_ranking_start])
+            list_cost.append(best_costs)
+
+
+    ##plotting
+    y=np.arange(1,number_of_test_images+1)/number_of_test_images+1
+    best_costs = np.array(best_costs)
+    plt.subplot()
+    ###greedy
+    plt.plot(best_costs[:,0],y,label= 'greedy')
+    ####fptas
+    plt.plot(best_costs[:,1],y,label= 'fptas')
+    ####ranking
+    plt.plot(best_costs[:,2],y,label = 'ranking_average')
+    ####pareto
+    plt.plt(best_costs[:,3],y,label='pareto optimal')
+    plt.xlabel('Search cost')
+    plt.ylabel('Percentage of test images')
+    plt.title('Greedy time={},FPTAS time ={},Ranking_time={}'.format(time_track[0],time_track[1],time_track[2]))
+    plt.legend
+    plt.show()
+
+
 
 
 def prediction_forest(headers, feature_length, csv_file_location_test, file_name_random_forest, clf, file_name,selected_col):
@@ -808,8 +893,8 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
                 classified=1
             elif classified ==1:
                 classified=0"""
-            prob_positive = prob[1]
-            prob_negative = prob[0]
+            prob_positive = prob[0]
+            prob_negative = prob[1]
             positve_index = int(round(prob_positive / 10))
             negative_index = int(round(prob_negative / 10))
             ######
@@ -843,8 +928,9 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     x_axis = x_axis / 10
 
     fig, ax = plt.subplots()
-    line = ax.plot(x_axis, accuracy_negative, label='positve')
-    line2 = ax.plot(x_axis, accuracy_positve, label='negative')
+    line = ax.plot(x_axis, accuracy_positve, label='positve')
+
+    line2 = ax.plot(x_axis, accuracy_negative, label='negative')
     ax.legend()
     plt.xlabel('probability from random forest')
     plt.ylabel('percentage of matches')
@@ -898,6 +984,10 @@ def pareto_optimal(result_forest, actual_cost, capacity, N,limit):
                     pareto_optimal_solution.append(sol_temp[last_index])
     return pareto_optimal_solution
 
+
+
+
+
 def get_image_descriptors(image_array,cameras):
     for rand, cam in enumerate(cameras):
 
@@ -938,12 +1028,34 @@ def greedy_mine(N, capacity, weight_cost):
 
     return best_cost, best_comb, best_value
 
-
-def average_ranking(N,list_prioritizatoin):
-    #cost , prob
+def average_ranking(N, list_prioritizatoin,capacity):
+    # cost , prob
     ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
-    ranking_prob =  [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
-    ranking_cost = sorted(ranking_cost, key=lambda x: x[1], reverse=False)
+    ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
+    ranking_cost =np.array( sorted(ranking_cost, key=lambda x: x[1], reverse=False))
+    ranking_prob =np.array( sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    ranked_array =[]
+
+    for i in range(len(list_prioritizatoin)):
+        local_rank_cost = np.argwhere(ranking_cost[:,0]==i)
+        local_rank_prob = np.argwhere(ranking_prob[:,0]==i)
+        average = local_rank_cost+local_rank_prob/2
+        ranked_array.append((i,average))
+    ranked_array = np.array(sorted(ranked_array, key=lambda x: x[1], reverse=False))
+    return_rank = ranked_array[:,0][:N]
+    local_capacity =0
+    print(return_rank)
+    for j,i in enumerate(return_rank):
+        i = int(i)
+        local_capacity += list_prioritizatoin[i][0]
+        if local_capacity > capacity:
+            local_capacity -= list_prioritizatoin[i][0]
+
+
+
+
+
+    return  local_capacity
 
 
 def handle_data_for_test_image(positive,feature_length,csv_file_location_kmeans):

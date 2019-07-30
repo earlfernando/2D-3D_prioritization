@@ -14,6 +14,7 @@ from operator import itemgetter
 import random
 import matplotlib.pyplot as plt
 import time
+from sklearn.utils import  shuffle
 from rerf.rerfClassifier import rerfClassifier
 from sklearn.tree import export_graphviz
 from sklearn.externals.six import StringIO
@@ -381,6 +382,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     # print(X.shape)
     # y = chunk['label']
     # clf.fit(X, y)
+    chunk = shuffle(chunk)
     data = chunk.iloc[:, 0:-1]
     corr = data.corr()
     # sns.heatmap(corr)
@@ -818,27 +820,28 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         for number, prob in enumerate(forest_result_local):
 
             total += 1
-            truth = y[number]
             classified = forest_result_class[number]
+            truth = y[number]
+
             """classified = np.argmax(prob)
             if classified==0:
                 classified=1
             elif classified ==1:
                 classified=0"""
-            prob_positive = prob[1]
-            prob_negative = prob[0]
+            prob_positive = prob[0]
+            prob_negative = prob[1]
             positve_index = int(round(prob_positive / 10))
             negative_index = int(round(prob_negative / 10))
             ######
             local_prob_negative[negative_index] += 1
             local_prob_positive[positve_index] += 1
+            #print('classified={}, truth ={}. prob_max ={}'.format(classified, truth, np.argmax(prob)))
             if truth == classified:
+
                 local_negative[negative_index] += 1
                 local_positive[positve_index] += 1
                 model_accuracy += 1
             #####
-
-
 
     # print(prob/10,'positive',classified,truth,np.argmax(prob))
     # print(prob/10,'negative',classified,truth,np.argmax(prob))
@@ -855,13 +858,14 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
             accuracy_negative.append(local_negative[i] / local_prob_negative[i])
         else:
             accuracy_negative.append(0)
+    print(accuracy_positve,accuracy_negative,local_positive,local_prob_positive,local_negative,local_prob_negative)
     x_axis = np.arange(number_axis)
     x_axis = x_axis / 10
 
 
     fig, ax = plt.subplots()
-    line = ax.plot(x_axis, accuracy_negative, label='positve')
-    line2 = ax.plot(x_axis, accuracy_positve, label='negative')
+    line = ax.plot(x_axis, accuracy_positve, label='positve')
+    line2 = ax.plot(x_axis, accuracy_negative, label='negative')
     ax.legend()
     plt.xlabel('probability from random forest')
     plt.ylabel('percentage of matches')
@@ -954,11 +958,34 @@ def greedy_mine(N, capacity, weight_cost):
     return best_cost, best_comb, best_value
 
 
-def average_ranking(N, list_prioritizatoin):
+def average_ranking(N, list_prioritizatoin,capacity):
     # cost , prob
     ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
     ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
-    ranking_cost = sorted(ranking_cost, key=lambda x: x[1], reverse=False)
+    ranking_cost =np.array( sorted(ranking_cost, key=lambda x: x[1], reverse=False))
+    ranking_prob =np.array( sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    ranked_array =[]
+
+    for i in range(len(list_prioritizatoin)):
+        local_rank_cost = np.argwhere(ranking_cost[:,0]==i)
+        local_rank_prob = np.argwhere(ranking_prob[:,0]==i)
+        average = local_rank_cost+local_rank_prob/2
+        ranked_array.append((i,average))
+    ranked_array = np.array(sorted(ranked_array, key=lambda x: x[1], reverse=False))
+    return_rank = ranked_array[:,0][:N]
+    local_capacity =0
+    print(return_rank)
+    for j,i in enumerate(return_rank):
+        i = int(i)
+        local_capacity += list_prioritizatoin[i][0]
+        if local_capacity > capacity:
+            local_capacity -= list_prioritizatoin[i][0]
+
+
+
+
+
+    return  local_capacity
 
 
 def handle_data_for_test_image(positive, feature_length, csv_file_location_kmeans):

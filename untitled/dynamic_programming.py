@@ -2,7 +2,7 @@
 from decorators import memoized
 
 
-def dynamic_programming(number, capacity, weight_cost):
+def dynamic_programming(number, capacity, weight_cost,list_limit):
     """
     Solve the knapsack problem by finding the most valuable
     subsequence of `weight_cost` subject that weighs no more than
@@ -32,9 +32,13 @@ def dynamic_programming(number, capacity, weight_cost):
 
     j = capacity
     result = [0] * number
+    counter =0
     for i in range(len(weight_cost), 0, -1):
 
         if bestvalue(i, j) != bestvalue(i - 1, j):
-            result[i - 1] = 1
-            j -= weight_cost[i - 1][0]
-    return bestvalue(len(weight_cost), capacity), result
+            if counter <= list_limit:
+                result[i - 1] = 1
+                j -= weight_cost[i - 1][0]
+            else:
+                break
+    return bestvalue(len(weight_cost), capacity)

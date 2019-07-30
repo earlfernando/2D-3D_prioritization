@@ -32,20 +32,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
-csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-save_location_overall = "/home/earl/Thesis/GreatCourt/"
-database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
+#csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
+save_location_overall = "/home/earlfernando/greatCourtTrinity/dataset_20000/"
+#database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earl/Thesis/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earl/Thesis/GreatCourt/training_Data_RandomForest_10000.csv"
-file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
+csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_10000.csv"
+#file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
+#file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
+#csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
+#database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
-point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-csv_file_location_kmeans_test = "/home/earl/Thesis/GreatCourt/test_kmeans_modified.csv"
+#point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
+csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/dataset_20000/test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -341,7 +341,7 @@ def feature_selection(number):
     if number == 1:
         name = 'correleation'
     if number == 2:
-        name = 'correalation+pvalue'
+        name = 'correlation+pvalue'
     return  name
 
 
@@ -819,8 +819,8 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
                 classified=1
             elif classified ==1:
                 classified=0"""
-            prob_positive = prob[1]
-            prob_negative = prob[0]
+            prob_positive = prob[0]
+            prob_negative = prob[1]
             positve_index = int(round(prob_positive / 10))
             negative_index = int(round(prob_negative / 10))
             ######
@@ -853,8 +853,8 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     x_axis = x_axis / 10
 
     fig, ax = plt.subplots()
-    line = ax.plot(x_axis, accuracy_negative, label='positve')
-    line2 = ax.plot(x_axis, accuracy_positve, label='negative')
+    line = ax.plot(x_axis, accuracy_positve, label='positve')
+    line2 = ax.plot(x_axis, accuracy_negative, label='negative')
     ax.legend()
     plt.xlabel('probability from random forest')
     plt.ylabel('percentage of matches')
@@ -947,7 +947,6 @@ def greedy_mine(N, capacity, weight_cost):
 
     return best_cost, best_comb, best_value
 
-
 def average_ranking(N, list_prioritizatoin,capacity):
     # cost , prob
     ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
@@ -964,9 +963,16 @@ def average_ranking(N, list_prioritizatoin,capacity):
     ranked_array = np.array(sorted(ranked_array, key=lambda x: x[1], reverse=False))
     return_rank = ranked_array[:,0][:N]
     local_capacity =0
-    for i in return_rank:
-        if local_capacity<= capacity:
-            local_capacity += list_prioritizatoin[i][0]
+    print(return_rank)
+    for j,i in enumerate(return_rank):
+        i = int(i)
+        local_capacity += list_prioritizatoin[i][0]
+        if local_capacity > capacity:
+            local_capacity -= list_prioritizatoin[i][0]
+
+
+
+
 
     return  local_capacity
 
@@ -1018,12 +1024,12 @@ print('all the csv files are ready')
 ###remove this
 headers = create_headers(feature_length)
 headers.append('label')
-N = [100, 500, 1000, 1500]
-max_depth = [10, 100, 300, 1000]
-min_leaf_nodes = [1, 3, 10, 20]
-#N =[10]
-#max_depth = [10]
-#min_leaf_nodes =[1]
+#N = [100, 500, 1000, 1500]
+#max_depth = [10, 100, 300, 1000]
+#min_leaf_nodes = [1, 3, 10, 20]
+N =[1000]
+max_depth = [10]
+min_leaf_nodes =[1]
 accuracy_list=[['N','max_depth','min_samples_leaf','accuracy','time']]
 for feature in range(3):
     if feature <=1:
@@ -1038,11 +1044,11 @@ for feature in range(3):
                 save_location_forest = save_location_local+'.sav'
                 save_location_picture = save_location_local+'.png'
                 clf,selected_columns= random_forest_chunks(headers, feature_length, csv_file_location_400000,
-                                                           file_name_random_forest, n, max_dept, min, save_location_picture, feature_mode=feature)
+                                                           save_location_forest, n, max_dept, min, save_location_picture, feature_mode=feature)
             #clf = pickle.load(open(file_name_random_forest, 'rb'))
 
-            accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, file_name_random_forest, clf,
-                                                    file_name=file_name_random_forest, selected_col=selected_columns, n=n, max_dept=max_dept, min=min, save_location_picture=save_location_picture)
+            accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
+                                                    file_name=save_location_forest, selected_col=selected_columns, n=n, max_dept=max_dept, min=min, save_location_picture=save_location_picture)
             accuracy_list.append([str(n), str(max_dept), str(min), str(accuracy), str(local_time)])
 
 save_location_csv =save_location_overall+'final_result.csv'
