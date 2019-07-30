@@ -340,7 +340,7 @@ def feature_selection(number):
     if number == 0:
         name = 'noFeature'
     if number == 1:
-        name = 'correleation'
+        name = 'correlation'
     if number == 2:
         name = 'correlation+pvalue'
     return  name
