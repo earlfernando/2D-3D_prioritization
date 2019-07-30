@@ -26,6 +26,7 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.utils import shuffle
 import warnings
 import statsmodels.api as sm
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
@@ -354,7 +355,9 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
                                  oob_score=True, class_weight="balanced", bootstrap=True)
     # clf = RandomForestClassifier(n_estimators=1000,max_features=None,max_depth=10,n_jobs=-1,oob_score= True,random_state= 42)
     chunk = pd.read_csv(csv_file_location)
-    np.random.seed(123)
+    np.random.see(123)
+    chunk = shuffle(chunk)
+
     if feature_mode ==0:
         selected_columns = create_headers(feature_length)
         X= chunk[selected_columns]
