@@ -1034,8 +1034,6 @@ min_leaf_nodes = [1, 3, 10, 20]
 #min_leaf_nodes =[1]
 accuracy_list=[['N','max_depth','min_samples_leaf','accuracy','time']]
 for feature in range(3):
-    if feature <=1:
-        continue
     name = feature_selection(feature)
     save_location = save_location_overall+name
     for n in N:
@@ -1047,7 +1045,7 @@ for feature in range(3):
                 save_location_forest = save_location_local+'.sav'
                 save_location_picture = save_location_local+'.png'
                 clf,selected_columns= random_forest_chunks(headers, feature_length, csv_file_location_400000,
-                                                           save_location_forest, n, max_dept, min, save_location_picture, feature_mode=feature)
+                                                           save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature)
             #clf = pickle.load(open(file_name_random_forest, 'rb'))
 
             accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
