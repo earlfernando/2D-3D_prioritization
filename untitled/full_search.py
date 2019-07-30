@@ -27,7 +27,7 @@ from sklearn.feature_selection import chi2
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 import warnings
-import statsmodels.formula.api as sm
+import statsmodels.api as sm
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 warnings.filterwarnings("ignore")
