@@ -1048,9 +1048,9 @@ for feature in range(3):
                                                            save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature)
             #clf = pickle.load(open(file_name_random_forest, 'rb'))
 
-            accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
+                accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
                                                     file_name=save_location_forest, selected_col=selected_columns, n=n, max_dept=max_dept, min=min, save_location_picture=save_location_picture)
-            accuracy_list.append([str(n), str(max_dept), str(min), str(accuracy), str(local_time)])
+                accuracy_list.append([str(n), str(max_dept), str(min), str(accuracy), str(local_time)])
 
 save_location_csv =save_location_overall+'final_result.csv'
 with open(save_location_csv, 'w') as csvFile:
