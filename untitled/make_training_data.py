@@ -36,6 +36,7 @@ sys.setrecursionlimit(15000)
 database_locatiom = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
 csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/dataset_test.txt"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 #file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
@@ -120,13 +121,13 @@ class image:
                 self.negative_descriptor.append(descriptor)
 
 
-def add_feature_location(database_location):
+def add_feature_location(database_location,images_test_file_location):
     database = sqlite3.connect(database_location)
     cursor = database.cursor()
     test_images_id = []
     training_images_id = []
 
-    test_images_str = test_images_string()
+    test_images_str = test_images_string(images_test_file_location)
     cursor.execute('''SELECT image_id,name FROM IMAGES ''')
 
     for row in cursor:
@@ -484,8 +485,8 @@ def search_cost_calculation(headers, feature_length, csv_file_location_kmeans, f
     return search_cost
 
 
-def test_images_string():
-    images_test_file_location = "/home/earl/Thesis/GreatCourt/dataset_test.txt"
+def test_images_string(images_test_file_location):
+
     test_images = []
     with open(images_test_file_location, 'r') as data:
         for line in data:
@@ -496,14 +497,14 @@ def test_images_string():
     return test_images
 
 
-def make_test_data(points3D_location, database_location):
+def make_test_data(points3D_location, database_location,images_test_file_location):
     points3D = read_points3d_binary(points3D_location)
     database = sqlite3.connect(database_location)
     cursor = database.cursor()
     test_images_id = []
     training_images_id = []
 
-    test_images_str = test_images_string()
+    test_images_str = test_images_string(images_test_file_location)
     cursor.execute('''SELECT image_id,name FROM IMAGES ''')
     for row in cursor:
         """image_name = row[1].split('/')
@@ -1075,7 +1076,7 @@ def handle_data_for_test_image(positive, feature_length, csv_file_location_kmean
 
 cameras = read_images_binary(image_bin_location)
 # image_array = get_details_from_database()
-image_array = add_feature_location(database_locatiom)
+image_array = add_feature_location(database_locatiom,images_test_file_location)
 
 print('task1 complete')
 positive, negative = make_training_data(cameras, image_array)
@@ -1085,7 +1086,7 @@ headers = handle_data(positive, negative, feature_length, csv_file_location_4000
 print('3')
 headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
-#test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom)
+#test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom,images_test_file_location)
 #headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
 print('all the csv files are ready')
 
