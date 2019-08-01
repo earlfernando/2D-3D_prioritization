@@ -35,11 +35,11 @@ sys.setrecursionlimit(15000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
 database_locatiom = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earl/Thesis/GreatCourt/training_Data_RandomForest_overall.csv"
+csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 #file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
-#csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
 database_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
 image_bin_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
