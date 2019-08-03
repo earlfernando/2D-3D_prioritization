@@ -1216,7 +1216,7 @@ file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_k
 save_location_picture = "home/earlfernando/greatCourtTrinity/GreatCourt/"
 capacity = 200000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
-              image_array, N)
+              image_array, N,save_location_picture)
 """
 #Selectkbest -Univariate selection using  chi2  statistical test for non negative values
 #https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e 0.629
