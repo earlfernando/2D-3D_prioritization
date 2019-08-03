@@ -32,19 +32,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
-csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location = "/home/earl/Thesis/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earl/Thesis/GreatCourt/training_Data_RandomForest_10000.csv"
-file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
+#csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
+database_locatiom = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
+image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
+csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/dataset_test.txt"
+#file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
+file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
-point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-csv_file_location_kmeans_test = "/home/earl/Thesis/GreatCourt/test_kmeans_modified.csv"
+database_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
+image_bin_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
+point3D_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/points3D.bin"
+csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -120,13 +121,13 @@ class image:
                 self.negative_descriptor.append(descriptor)
 
 
-def add_feature_location(database_location):
+def add_feature_location(database_location,images_test_file_location):
     database = sqlite3.connect(database_location)
     cursor = database.cursor()
     test_images_id = []
     training_images_id = []
 
-    test_images_str = test_images_string()
+    test_images_str = test_images_string(images_test_file_location)
     cursor.execute('''SELECT image_id,name FROM IMAGES ''')
 
     for row in cursor:
@@ -390,6 +391,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
                 if columns[j]:
                     columns[j] = False
     selected_columns = data.columns[columns]
+    print(selected_columns)
     data = data[selected_columns]
 
     selected_columns = selected_columns[1:].values
@@ -483,8 +485,8 @@ def search_cost_calculation(headers, feature_length, csv_file_location_kmeans, f
     return search_cost
 
 
-def test_images_string():
-    images_test_file_location = "/home/earl/Thesis/GreatCourt/dataset_test.txt"
+def test_images_string(images_test_file_location):
+
     test_images = []
     with open(images_test_file_location, 'r') as data:
         for line in data:
@@ -495,14 +497,14 @@ def test_images_string():
     return test_images
 
 
-def make_test_data(points3D_location, database_location):
+def make_test_data(points3D_location, database_location,images_test_file_location):
     points3D = read_points3d_binary(points3D_location)
     database = sqlite3.connect(database_location)
     cursor = database.cursor()
     test_images_id = []
     training_images_id = []
 
-    test_images_str = test_images_string()
+    test_images_str = test_images_string(images_test_file_location)
     cursor.execute('''SELECT image_id,name FROM IMAGES ''')
     for row in cursor:
         """image_name = row[1].split('/')
@@ -776,8 +778,8 @@ def add_descriptors_to_image_array(image_array, cameras):
     return image_array
 
 
-def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
-                  image_array, N):
+def final_predict(feature_length, test_data_location, file_name_random_forest, file_name_kmeans, search_cost, capacity,
+                  selected_columns, image_array, N):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
     best_costs = np.zeros(4)
@@ -1071,27 +1073,43 @@ def handle_data_for_test_image(positive, feature_length, csv_file_location_kmean
 
     return headers
 
-
 cameras = read_images_binary(image_bin_location)
-
 # image_array = get_details_from_database()
-image_array = add_feature_location(database_locatiom)
+image_array = add_feature_location(database_locatiom,images_test_file_location)
 
 print('task1 complete')
-# positive, negative = make_training_data(cameras, image_array)
+positive, negative = make_training_data(cameras, image_array)
 print('task2 complete')
-
-# headers=handle_data(positive,negative,feature_length,csv_file_location_400000)
+"""
+headers = handle_data(positive, negative, feature_length, csv_file_location_400000)
 print('3')
-# headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
+headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
-# test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom)
-# headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
-print('all the csv files are ready')
+test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom,images_test_file_location)
+headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
+print('all the csv files are ready')"""
 
-# test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
+#test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
 # headers = handle_data_for_test_image(test_data,feature_length=feature_length,csv_file_location_kmeans=csv_file_test_image)
 
+###remove ttis
+#headers = create_headers(feature_length)
+#headers.append('label')
+
+# clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
+# k_means(headers,feature_length,csv_file_location,file_name)
+# selected_columns = ['1', '2', '3' ,'4' ,'5' ,'7' ,'8' ,'12' ,'15' ,'16' ,'19' ,'20' ,'21' ,'24', '28', '38', '49', '66' ,'81', '95']
+print("kmeans")
+print("random forest saved")
+#k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+# search_cost = search_cost_calculation(headers, feature_length, csv_file_location_kmeans, file_name_kmeans, number_of_clusters)
+
+# print(search_cost)
+# clf = pickle.load(open(file_name_random_forest, 'rb'))
+
+# prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf,file_name= file_name_random_forest,selected_col=selected_columns)
+# prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
+# prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
 ###remove this
 headers = create_headers(feature_length)
 headers.append('label')
