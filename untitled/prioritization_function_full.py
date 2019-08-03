@@ -847,7 +847,7 @@ def add_descriptors_to_image_array(image_array, cameras):
     plt.show()"""
 
 def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
-                  selected_columns, image_array, N):
+                  selected_columns, image_array, N,save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
     best_costs = np.zeros(3)
@@ -910,7 +910,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
     list_cost = np.array(list_cost)
     print(np.size(list_cost),np.size(y),list_cost,y)
-    plt.subplot()
+    fig,_=plt.subplot()
     ###greedy
     plt.plot(list_cost[:, 0], y, label='greedy')
     ####ranking
@@ -919,8 +919,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:, 2], y, label='pareto optimal')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={},Ranking_time={}'.format(time_track[0], time_track[1]))
-    plt.legend()
+    plt.title('Greedy time={},Ranking_time={},N={}'.format(time_track[0], time_track[1]))
+    plt.savefig(save_location_picture)
+    plt.close(fig)
     plt.show()
 
 
@@ -1212,6 +1213,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 N = 1000
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+save_location_picture = "home/earlfernando/greatCourtTrinity/GreatCourt/"
 capacity = 200000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array, N)
