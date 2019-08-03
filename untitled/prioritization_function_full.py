@@ -778,7 +778,7 @@ def add_descriptors_to_image_array(image_array, cameras):
     return image_array
 
 
-def final_predict(feature_length, test_data_location, file_name_random_forest, file_name_kmeans, search_cost, capacity,
+def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
                   selected_columns, image_array, N):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
