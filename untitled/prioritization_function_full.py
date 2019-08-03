@@ -908,8 +908,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     ##plotting
 
     y = np.arange(1, number_of_test_images ) / number_of_test_images
-    best_costs = np.array(best_costs)
-    print(np.size(best_costs),np.size(y),best_costs,y)
+    list_cost = np.array(list_cost)
+    print(np.size(list_cost),np.size(y),list_cost,y)
     plt.subplot()
     ###greedy
     plt.plot(list_cost[:, 0], y, label='greedy')
