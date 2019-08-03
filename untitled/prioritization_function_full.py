@@ -31,7 +31,7 @@ import statsmodels.formula.api as sm
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 warnings.filterwarnings("ignore")
-sys.setrecursionlimit(15000)
+sys.setrecursionlimit(150000000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
 database_locatiom = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
@@ -786,13 +786,14 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     time_track = np.zeros(3)
     list_cost = []
     ###parameter for pareto optimal
-    max_limit_pareto = np.amax(search_cost) * 0.2
+    max_limit_pareto = np.amax(search_cost) * 0.1
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
     number_of_test_images = 0
     for image in image_array:
         if image.train_test == 1:
             number_of_test_images += 1
+            print(number_of_test_images)
             # making data frame
             image_Data_frame = pd.DataFrame(image.poistive_descriptor, columns=headers)
             X = image_Data_frame[selected_columns]
@@ -1133,7 +1134,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 N = 1000
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-capacity = 10000000
+capacity = 1000000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array, N)
 """
