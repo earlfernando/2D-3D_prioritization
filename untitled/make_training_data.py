@@ -518,7 +518,7 @@ def make_test_data(points3D_location, database_location,images_test_file_locatio
     print('test images obtrained')
     test_images_id = np.array(test_images_id)
     training_images_id = np.array(training_images_id)
-    local_image_array = add_feature_location(database_location)
+    local_image_array = add_feature_location(database_location,images_test_file_location)
     cameras = read_images_binary(image_bin_location)
     image_array = make_testing_data(cameras, local_image_array)
     print('image_array made')
