@@ -36,9 +36,7 @@ def dynamic_programming(number, capacity, weight_cost,list_limit):
     for i in range(len(weight_cost), 0, -1):
 
         if bestvalue(i, j) != bestvalue(i - 1, j):
-            if counter <= list_limit:
+                counter +=1
                 result[i - 1] = 1
                 j -= weight_cost[i - 1][0]
-            else:
-                break
-    return bestvalue(len(weight_cost), capacity)
+    return bestvalue(len(weight_cost), capacity), result
