@@ -862,7 +862,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             number_of_test_images += 1
             print(number_of_test_images)
             # making data frame
-            image_Data_frame = pd.DataFrame(image.descriptor, columns=headers)
+
+            descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
+            image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             if N>len(image.descriptor):
                 N=len(image.descriptor)
             X = image_Data_frame[selected_columns]
