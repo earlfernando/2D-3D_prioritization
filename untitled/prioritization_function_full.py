@@ -866,7 +866,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
-            if N<len(descriptors):
+            if N>len(descriptors):
                 N=len(descriptors)-1
                 print(N)
 
@@ -1087,6 +1087,7 @@ def greedy_mine(N, capacity, weight_cost):
     ratios = [(index, item[1] / float(item[0])) for index, item in enumerate(weight_cost)]
     ratios = sorted(ratios, key=lambda x: x[1], reverse=True)
     best_comb = []
+    print(len(ratios))
 
     best_cost = 0
     for i in range(N):
