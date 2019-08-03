@@ -912,11 +912,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     print(np.size(best_costs),np.size(y),best_costs,y)
     plt.subplot()
     ###greedy
-    plt.plot(best_costs[:, 0], y, label='greedy')
+    plt.plot(list_cost[:, 0], y, label='greedy')
     ####ranking
-    plt.plot(best_costs[:, 2], y, label='ranking_average')
+    plt.plot(list_cost[:, 2], y, label='ranking_average')
     ####pareto
-    plt.plot(best_costs[:, 3], y, label='pareto optimal')
+    plt.plot(list_cost[:, 3], y, label='pareto optimal')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={},Ranking_time={}'.format(time_track[0], time_track[2]))
