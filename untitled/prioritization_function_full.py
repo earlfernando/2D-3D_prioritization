@@ -889,13 +889,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_greedy_start = time.time()
             best_cost_greedy, _, _ = greedy_mine(N, capacity=capacity, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
-            print('greedy over')
             #time_fptas_start = time.time()
             #best_cost_fptas, _ = FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,list_limit=N,scaling_factor=100)
             #time_fptas_end = time.time()
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, N, max_limit_pareto)
             pareto_optimal_search_cost = pareto_optimal_solution[-1][1]
-            print('pareto over')
             time_ranking_start = time.time()
             best_cost_ranking = average_ranking(N, list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
@@ -903,11 +901,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             best_costs += np.array([best_cost_greedy, best_cost_ranking, pareto_optimal_search_cost])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start])
-            list_cost.append(best_costs)
+            list_cost.append(np.copy(best_costs))
 
     ##plotting
 
-    y = np.arange(1, number_of_test_images ) / number_of_test_images
+    y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
     list_cost = np.array(list_cost)
     print(np.size(list_cost),np.size(y),list_cost,y)
     plt.subplot()
