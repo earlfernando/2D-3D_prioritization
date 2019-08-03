@@ -919,7 +919,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:, 2], y, label='pareto optimal')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={},Ranking_time={}'.format(time_track[0], time_track[2]))
+    plt.title('Greedy time={},Ranking_time={}'.format(time_track[0], time_track[1]))
     plt.legend()
     plt.show()
 
@@ -1212,7 +1212,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 N = 1000
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-capacity = 20
+capacity = 200000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array, N)
 """
