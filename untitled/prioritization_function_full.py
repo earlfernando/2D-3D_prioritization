@@ -863,8 +863,10 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             number_of_test_images += 1
             print(number_of_test_images)
             # making data frame
-
-            descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
+            if len(image.positive_descriptor)==0:
+                descriptors = image.negative_descriptor
+            else :
+                descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             if N>len(descriptors):
@@ -1208,7 +1210,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 N = 1000
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-capacity = 20000
+capacity = 200000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array, N)
 """
