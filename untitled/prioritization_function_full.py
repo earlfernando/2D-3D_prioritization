@@ -865,11 +865,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
 
             descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
-            if N>len(image.descriptor):
-                N=len(image.descriptor)-1
+            if N<len(descriptors):
+                N=len(descriptors)-1
                 print(N)
             X = image_Data_frame[selected_columns]
-            print(len(image.poistive_descriptor))
+            
             X_kmeans = image_Data_frame[headers]
             # prediction
             result_kmeans = kmeans_model.predict(X_kmeans)
