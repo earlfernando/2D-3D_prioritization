@@ -901,8 +901,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             best_costs += np.array([best_cost_greedy, best_cost_ranking, pareto_optimal_search_cost])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start])
+            print(len(list_cost))
             list_cost.append(np.copy(best_costs))
-
+            print(len(list_cost))
     ##plotting
 
     y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
@@ -1210,7 +1211,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 N = 1000
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-capacity = 20
+capacity = 1
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array, N)
 """
