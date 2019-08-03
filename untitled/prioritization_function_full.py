@@ -889,11 +889,13 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_greedy_start = time.time()
             best_cost_greedy, _, _ = greedy_mine(N, capacity=capacity, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
+            print('greedy over')
             #time_fptas_start = time.time()
             #best_cost_fptas, _ = FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,list_limit=N,scaling_factor=100)
             #time_fptas_end = time.time()
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, N, max_limit_pareto)
             pareto_optimal_search_cost = pareto_optimal_solution[-1][1]
+            print('pareto over')
             time_ranking_start = time.time()
             best_cost_ranking = average_ranking(N, list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
@@ -901,9 +903,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             best_costs += np.array([best_cost_greedy, best_cost_ranking, pareto_optimal_search_cost])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start])
-            print(len(list_cost))
             list_cost.append(np.copy(best_costs))
-            print(len(list_cost))
+
     ##plotting
 
     y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
@@ -913,13 +914,13 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     ###greedy
     plt.plot(list_cost[:, 0], y, label='greedy')
     ####ranking
-    plt.plot(list_cost[:, 2], y, label='ranking_average')
+    plt.plot(list_cost[:, 1], y, label='ranking_average')
     ####pareto
-    plt.plot(list_cost[:, 3], y, label='pareto optimal')
+    plt.plot(list_cost[:, 2], y, label='pareto optimal')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={},Ranking_time={}'.format(time_track[0], time_track[2]))
-    plt.legend
+    plt.legend()
     plt.show()
 
 
@@ -1211,7 +1212,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 N = 1000
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-capacity = 1
+capacity = 20
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array, N)
 """
