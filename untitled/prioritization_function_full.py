@@ -141,7 +141,7 @@ def add_feature_location(database_location,images_test_file_location):
     database.close()
     training_images_id = np.array(training_images_id)
     test_images_id = np.array(test_images_id)
-    print(test_images_id)
+    print(len(test_images_id))
 
     class_array = []
 
@@ -169,7 +169,6 @@ def add_feature_location(database_location,images_test_file_location):
 
         if len(test_images_id[mask_test]) == 1:
             test_train = 0
-            print(row[0])
 
         else:
             test_train = 1
@@ -573,7 +572,7 @@ def make_test_data(points3D_location, database_location,images_test_file_locatio
                 test_data_negative.append(descriptor)"""
     print('adding negative')
     for image in image_array:
-        if image.train_test == 1:
+        if image.train_test == 0:
             for descriptor in image.negative_descriptor:
                 test_data_negative.append(descriptor)
     return test_data_positive, test_data_negative
@@ -860,7 +859,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     headers = create_headers(feature_length)
     number_of_test_images = 0
     for image in image_array:
-        if image.train_test == 1:
+        if image.train_test == 0:
             number_of_test_images += 1
             print(number_of_test_images)
             # making data frame
