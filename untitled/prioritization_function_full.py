@@ -887,7 +887,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_fptas_end = time.time()
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, N, max_limit_pareto)
             pareto_optimal_search_cost = pareto_optimal_solution[-1][1]
-            time_ranking_start = time.tine()
+            time_ranking_start = time.time()
             best_cost_ranking = average_ranking(N, list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
             ### first greedy, then fptas then ranking, then pareto

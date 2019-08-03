@@ -34,10 +34,10 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-save_location_overall = "/home/earlfernando/greatCourtTrinity/dataset_20000/"
+save_location_overall = "/home/earlfernando/greatCourtTrinity/dataset_full/"
 #database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earl/Thesis/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_overall.csv"
+csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 #file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
@@ -46,6 +46,7 @@ number_of_clusters = 10000
 #database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
 #point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
+location_small_dataset ="/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_10000.csv"
 csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/dataset_20000/test_kmeans_modified.csv"
 max_cost = 20000
 
@@ -343,7 +344,7 @@ def feature_selection(number):
     return  name
 
 
-def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n,max_dept,min,save_location_forest,feature_mode):
+def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n,max_dept,min,save_location_forest,feature_mode,location_small_dataset):
     # df = pd.DataFrame.from_records(values, columns=headers)
     chunk_size = 10 ** 4
     counter = 0
@@ -367,8 +368,8 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
     ####
         
         """
-        location_small_dataset ="/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_10000.csv"
-        local_chunk =  pd.read_csv(csv_file_location)
+
+        local_chunk =  pd.read_csv(location_small_dataset)
         data = local_chunk.iloc[:, 0:-1]
         corr = data.corr()
         # sns.heatmap(corr)
@@ -1031,7 +1032,7 @@ for feature in range(2):
                 save_location_forest = save_location_local+'.sav'
                 save_location_picture = save_location_local+'.png'
                 clf,selected_columns= random_forest_chunks(headers, feature_length, csv_file_location_400000,
-                                                           save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature)
+                                                           save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature,location_small_dataset=location_small_dataset)
             #clf = pickle.load(open(file_name_random_forest, 'rb'))
 
                 accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
