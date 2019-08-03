@@ -16,8 +16,10 @@ import matplotlib.pyplot as plt
 import time
 from sklearn.utils import  shuffle
 from rerf.rerfClassifier import rerfClassifier
+from inspect import signature
 from sklearn.tree import export_graphviz
 from sklearn.externals.six import StringIO
+from sklearn.metrics import  precision_recall_curve,confusion_matrix
 from IPython.display import Image
 import matplotlib.image as mpimg
 from subprocess import call
@@ -374,7 +376,8 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     # clf = RandomForestClassifier(n_estimators=1000,max_features=None,max_depth=10,n_jobs=-1,random_state= 42,bootstrap= True)
     #clf = rerfClassifier(projection_matrix="RerF",
                            # n_estimators = 1000, max_depth = 10 , max_features= None,oob_score = True, n_jobs =-1, random_state=42)
-    clf = rerfClassifier(projection_matrix="RerF",n_estimators =10, max_depth =10, max_features= None,oob_score = True, n_jobs =-1, random_state=42)
+    clf = rerfClassifier(projection_matrix="RerF", n_estimators=10, max_depth=10, max_features=None, oob_score=True,
+                        n_jobs=-1, random_state=42, feature_combinations=1)
 
 
     chunk = pd.read_csv(csv_file_location)
@@ -793,6 +796,8 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     #####
 
     overall_time = 0
+    overall_predicted =np.array([])
+    overall_prob = np.array([])
     for chunk in pd.read_csv(csv_file_location_test, header=0, chunksize=chunk_size):
         X = chunk[selected_col]
         y = np.array(chunk['label'])
@@ -816,6 +821,8 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         chunk_accuracy += np.count_nonzero(forest_result_class == y)
         chunk_total += np.shape(forest_result_class)[0]
         print(chunk_accuracy / chunk_total, 'size', np.shape(forest_result_class)[0], 'chunk acc', chunk_accuracy)
+        overall_predicted=np.append(overall_predicted,y)
+        overall_prob = np.append(overall_prob,forest_result_local[:,0])
 
         for number, prob in enumerate(forest_result_local):
 
@@ -848,6 +855,22 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     print(model_accuracy / total, total)
     accuracy_negative = []
     accuracy_positve = []
+    precision,recall,thresholds = precision_recall_curve(overall_predicted,overall_prob,pos_label=0)
+    #precision_recall_threshold(precision,overall_prob,overall_predicted, recall, thresholds, 0.30)
+    #plot_precision_recall_vs_threshold(precision, recall, thresholds)
+    # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
+    step_kwargs = ({'step': 'post'}
+                   if 'step' in signature(plt.fill_between).parameters
+                   else {})
+    plt.step(recall, precision, color='b', alpha=0.2,
+             where='post')
+    plt.fill_between(recall, precision, alpha=0.2, color='b', **step_kwargs)
+
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.ylim([0.0, 1.05])
+    plt.xlim([0.0, 1.0])
+    plt.title('2-class Precision-Recall')
 
     for i in range(number_axis):
         if local_positive[i]:
@@ -873,6 +896,59 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     plt.show()
     pickle.dump(clf, open(file_name, 'wb'))
 
+
+def plot_precision_recall_vs_threshold(precisions, recalls, thresholds):
+    """
+    Modified from:
+    Hands-On Machine learning with Scikit-Learn
+    and TensorFlow; p.89
+    """
+    plt.figure(figsize=(8, 8))
+    plt.title("Precision and Recall Scores as a function of the decision threshold")
+    plt.plot(thresholds, precisions[:-1], "b--", label="Precision")
+    plt.plot(thresholds, recalls[:-1], "g-", label="Recall")
+    plt.ylabel("Score")
+    plt.xlabel("Decision Threshold")
+    plt.legend(loc='best')
+
+
+def adjusted_classes(y_scores, t):
+    """
+    This function adjusts class predictions based on the prediction threshold (t).
+    Will only work for binary classification problems.
+    """
+    return [1 if y >= t else 0 for y in y_scores]
+
+
+def precision_recall_threshold(p, r, y_scores,y_test,thresholds, t=0.5):
+    """
+    plots the precision recall curve and shows the current value for each
+    by identifying the classifier's threshold (t).
+    """
+
+    # generate new class predictions based on the adjusted_classes
+    # function above and view the resulting confusion matrix.
+    y_pred_adj = adjusted_classes(y_scores, t)
+    print(pd.DataFrame(confusion_matrix(y_test, y_pred_adj),
+                       columns=['pred_neg', 'pred_pos'],
+                       index=['neg', 'pos']))
+
+    # plot the curve
+    plt.figure(figsize=(8, 8))
+    plt.title("Precision and Recall curve ^ = current threshold")
+    plt.step(r, p, color='b', alpha=0.2,
+             where='post')
+    plt.fill_between(r, p, step='post', alpha=0.2,
+                     color='b')
+    plt.ylim([0.5, 1.01]);
+    plt.xlim([0.5, 1.01]);
+    plt.xlabel('Recall');
+    plt.ylabel('Precision');
+
+    # plot the current threshold on the line
+    close_default_clf = np.argmin(np.abs(thresholds - t))
+    plt.plot(r[close_default_clf], p[close_default_clf], '^', c='k',
+             markersize=15)
 
 def pareto_optimal(result_forest, actual_cost, capacity, N, limit):
     parameter_to_cost_skip = 2

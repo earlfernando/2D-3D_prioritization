@@ -571,7 +571,7 @@ def make_test_data(points3D_location, database_location,images_test_file_locatio
                 test_data_negative.append(descriptor)"""
     print('adding negative')
     for image in image_array:
-        if image.train_test == 1:
+        if image.train_test == 0:
             for descriptor in image.negative_descriptor:
                 test_data_negative.append(descriptor)
     return test_data_positive, test_data_negative
@@ -1073,36 +1073,36 @@ def handle_data_for_test_image(positive, feature_length, csv_file_location_kmean
 
     return headers
 
-"""
+
 cameras = read_images_binary(image_bin_location)
 # image_array = get_details_from_database()
 image_array = add_feature_location(database_locatiom,images_test_file_location)
 
 print('task1 complete')
-positive, negative = make_training_data(cameras, image_array)
+#positive, negative = make_training_data(cameras, image_array)
 print('task2 complete')
 
-headers = handle_data(positive, negative, feature_length, csv_file_location_400000)
+#headers = handle_data(positive, negative, feature_length, csv_file_location_400000)
 print('3')
-headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
+#headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
 test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom,images_test_file_location)
 headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
-print('all the csv files are ready')"""
+print('all the csv files are ready')
 
 #test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
 # headers = handle_data_for_test_image(test_data,feature_length=feature_length,csv_file_location_kmeans=csv_file_test_image)
 
 ###remove ttis
-headers = create_headers(feature_length)
-headers.append('label')
+#headers = create_headers(feature_length)
+#headers.append('label')
 
 # clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
 # k_means(headers,feature_length,csv_file_location,file_name)
 # selected_columns = ['1', '2', '3' ,'4' ,'5' ,'7' ,'8' ,'12' ,'15' ,'16' ,'19' ,'20' ,'21' ,'24', '28', '38', '49', '66' ,'81', '95']
 print("kmeans")
 print("random forest saved")
-k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+#k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 # search_cost = search_cost_calculation(headers, feature_length, csv_file_location_kmeans, file_name_kmeans, number_of_clusters)
 
 # print(search_cost)
