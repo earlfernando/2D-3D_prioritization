@@ -141,6 +141,7 @@ def add_feature_location(database_location,images_test_file_location):
     database.close()
     training_images_id = np.array(training_images_id)
     test_images_id = np.array(test_images_id)
+    print(test_images_id)
 
     class_array = []
 
@@ -168,6 +169,7 @@ def add_feature_location(database_location,images_test_file_location):
 
         if len(test_images_id[mask_test]) == 1:
             test_train = 0
+            print(row[0])
 
         else:
             test_train = 1
