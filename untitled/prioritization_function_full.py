@@ -12,9 +12,9 @@ from sklearn.cluster import KMeans, MiniBatchKMeans
 from fptas import FPTAS
 from operator import itemgetter
 import random
-import  time
-import os,shutil
 import matplotlib.pyplot as plt
+import time
+from sklearn.utils import shuffle
 from sklearn.tree import export_graphviz
 from sklearn.externals.six import StringIO
 from IPython.display import Image
@@ -26,27 +26,25 @@ from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-from sklearn.utils import shuffle
 import warnings
-import statsmodels.api as sm
+import statsmodels.formula.api as sm
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
-#csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-save_location_overall = "/home/earlfernando/greatCourtTrinity/dataset_20000/"
-#database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
+csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
+database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location = "/home/earl/Thesis/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_overall.csv"
-#file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-#file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
+csv_file_location_400000 = "/home/earl/Thesis/GreatCourt/training_Data_RandomForest_10000.csv"
+file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
+file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
-#csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
-#database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
+database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
 image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
-#point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/dataset_20000/test_kmeans_modified.csv"
+point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
+csv_file_location_kmeans_test = "/home/earl/Thesis/GreatCourt/test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -336,40 +334,16 @@ def random_forest(headers, feature_length, csv_file_location, file_name):
 
 
 def feature_selection(number):
+    csv_file_location_local = "/home/earl/Thesis/GreatCourt/training_Data_RandomForest_10000.csv"
     if number == 0:
-        name = 'noFeature'
-    if number == 1:
-        name = 'correlation'
-    return  name
-
-
-def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n,max_dept,min,save_location_forest,feature_mode):
-    # df = pd.DataFrame.from_records(values, columns=headers)
-    chunk_size = 10 ** 4
-    counter = 0
-    #clf = RandomForestClassifier(n_estimators=n, max_features=None, random_state=42, max_depth=max_dept, n_jobs=-1,
-                      #           min_samples_leaf=min, oob_score=True, class_weight="balanced", bootstrap=True)
-    clf = RandomForestClassifier(n_estimators=n,warm_start= True, max_features= None,n_jobs=-1,max_depth=max_dept,min_samples_leaf=min,class_weight="balanced",
-                                 random_state=42,oob_score= True)
-    # clf = RandomForestClassifier(n_estimators=1000,max_features=None,max_depth=10,n_jobs=-1,oob_score= True,random_state= 42)
-    chunk = pd.read_csv(csv_file_location)
-    np.random.seed(123)
-    chunk = shuffle(chunk)
-    local_counter =1
-
-    if feature_mode ==0:
         selected_columns = create_headers(feature_length)
-
-    if feature_mode==1 :
-        """
-    ######
-    Change the location for different dataset
-    ####
-        
-        """
-        location_small_dataset ="/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_10000.csv"
-        local_chunk =  pd.read_csv(csv_file_location)
-        data = local_chunk.iloc[:, 0:-1]
+    if number >= 1:
+        chunk = pd.read_csv(csv_file_location_local)
+        # X= chunk[create_headers(feature_length)]
+        # print(X.shape)
+        # y = chunk['label']
+        # clf.fit(X, y)
+        data = chunk.iloc[:, 0:-1]
         corr = data.corr()
         # sns.heatmap(corr)
         # plt.show()
@@ -380,19 +354,55 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
                     if columns[j]:
                         columns[j] = False
         selected_columns = data.columns[columns]
-        selected_columns = selected_columns[1:].values
-    ####chunk forest
-    for i, chunk in enumerate(pd.read_csv(csv_file_location, header=0, chunksize=chunk_size)):
-        X = chunk[selected_columns]
-        print(i)
-        y = chunk['label']
-        clf.fit(X, y)
-        print(clf.oob_score_)
-        if local_counter < n:
-            clf.n_estimators += 1
+        if number >= 2:
+            data = data[selected_columns]
+            selected_columns = selected_columns[1:].values
+            SL = 0.3
+            data_modeled, selected_columns = backwardElimination(data.iloc[:, 0:-1].values, data.iloc[:, -1].values, SL,
+                                                                 selected_columns)
+    print(selected_columns)
+    return selected_columns
 
+
+def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
+    # df = pd.DataFrame.from_records(values, columns=headers)
+    chunk_size = 10 ** 4
+    counter = 0
+    # clf = RandomForestClassifier(n_estimators=1000,max_features=None,random_state= 42,max_depth=10,n_jobs=-1,oob_score=True,class_weight= "balanced",bootstrap= True)
+    clf = RandomForestClassifier(n_estimators=1000, max_features=None, max_depth=10, n_jobs=-1, random_state=42,
+                                 bootstrap=True)
+
+    chunk = pd.read_csv(csv_file_location)
+    # X= chunk[create_headers(feature_length)]
+    # print(X.shape)
+    # y = chunk['label']
+    # clf.fit(X, y)
+    np.random.seed(123)
+    chunk = shuffle(chunk)
+    data = chunk.iloc[:, 0:-1]
+    corr = data.corr()
+    # sns.heatmap(corr)
+    # plt.show()
+    columns = np.full((corr.shape[0],), True, dtype=bool)
+    for i in range(corr.shape[0]):
+        for j in range(i + 1, corr.shape[0]):
+            if corr.iloc[i, j] >= 0.5:
+                if columns[j]:
+                    columns[j] = False
+    selected_columns = data.columns[columns]
+    data = data[selected_columns]
+
+    selected_columns = selected_columns[1:].values
+    SL = 0.3
+    data_modeled, selected_columns = backwardElimination(data.iloc[:, 0:-1].values, data.iloc[:, -1].values, SL,
+                                                         selected_columns)
+    data = pd.DataFrame(data=data_modeled, columns=selected_columns)
+
+    clf.fit(data.values, chunk['label'])
+    # print(clf.feature_importances_)
+    # print(clf.oob_score_)
     # print(selected_columns)
-
+    dot_data = StringIO()
     """
     for i in range (1000):
         estimators = clf.estimators_[i]
@@ -409,13 +419,14 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
         plt.show()"""
     #  print(clf.decision_path(data.values))
 
-    pickle.dump(clf, open(save_location_forest, 'wb'))
+    pickle.dump(clf, open(file_name, 'wb'))
 
-    return clf,selected_columns
+    return clf, selected_columns
+
+    # pickle.dump(clf, open(file_name, 'wb'))
 
     # pickle.dump(clf, open(file_name, 'wb'))
 
-    # pickle.dump(clf, open(file_name, 'wb'))
 
 def backwardElimination(x, Y, sl, columns):
     numVars = len(x[0])
@@ -621,13 +632,11 @@ def prediction(feature_length, test_data_location, file_name_random_forest, file
     total_cost = np.sum(actual_cost)
     pareto_costs = []
     greedy_costs = []
-    rank_costs = []
     Numbers = np.arange(100, 4000, 500)
     for N in Numbers:
         best_cost_greedy, _, _ = greedy_mine(N, capacity=capacity, weight_cost=list_for_prioritization)
-        local_rank_costs = average_ranking(N,list_prioritizatoin=list_for_prioritization,capacity=capacity)
+
         greedy_costs.append(best_cost_greedy)
-        rank_costs.append(local_rank_costs)
         pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, N, max_limit_pareto)
         pareto_optimal_search_cost = pareto_optimal_solution[-1][1]
         pareto_costs.append(pareto_optimal_search_cost)
@@ -635,7 +644,6 @@ def prediction(feature_length, test_data_location, file_name_random_forest, file
     print(pareto_costs, greedy_costs)
     pareto_costs = pareto_costs / total_cost
     greedy_costs = greedy_costs / total_cost
-    rank_costs = rank_costs/total_cost
     print(pareto_costs)
     print(greedy_costs)
     print(Numbers)
@@ -651,7 +659,6 @@ def prediction(feature_length, test_data_location, file_name_random_forest, file
     # plt.plot(pareto_costs.cumsum(),bins,label= 'Pareto optimal')
     plt.plot(pareto_costs, Numbers, label='Pareto optimal')
     plt.plot(greedy_costs, Numbers, label="Greedy")
-    plt.plot(rank_costs,Numbers,label= 'Ranking')
     plt.legend()
     plt.show()
 
@@ -751,11 +758,93 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     plt.title('Random_forest n_estimator =1000 , max_features = number of features')
     plt.show()
     pickle.dump(clf, open(file_name, 'wb'))
+
+
 """
 
 
+def add_descriptors_to_image_array(image_array, cameras):
+    for rand, cam in enumerate(cameras):
+
+        for h, k in enumerate(cameras[cam].point3D_ids):
+
+            if k >= 0:
+                id = cameras[cam].xys[h]
+                image_array[cam - 1].add_positve(id[0], id[1])
+
+        # image_array[cam - 1].add_negative()
+    return image_array
+
+
+def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
+                  image_array, N):
+    forest_model = pickle.load(open(file_name_random_forest, 'rb'))
+    kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
+    best_costs = np.zeros(4)
+    time_track = np.zeros(3)
+    list_cost = []
+    ###parameter for pareto optimal
+    max_limit_pareto = np.amax(search_cost) * 0.2
+    ## creating loop of the image_Array
+    headers = create_headers(feature_length)
+    number_of_test_images = 0
+    for image in image_array:
+        if image.train_test == 1:
+            number_of_test_images += 1
+            # making data frame
+            image_Data_frame = pd.DataFrame(image.poistive_descriptor, columns=headers)
+            X = image_Data_frame[selected_columns]
+            X_kmeans = image_Data_frame[headers]
+            # prediction
+            result_kmeans = kmeans_model.predict(X_kmeans)
+            result_forest = forest_model.predict_proba(X)
+            # make search cost
+            actual_cost = []
+            for i in result_kmeans:
+                actual_cost.append(search_cost[int(i)])
+            total_cost = np.sum(actual_cost)
+            # combine for prioritization
+            list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
+            time_greedy_start = time.time()
+            best_cost_greedy, _, _ = greedy_mine(N, capacity=capacity, weight_cost=list_for_prioritization)
+            time_greedy_end = time.time()
+            time_fptas_start = time.time()
+            best_cost_fptas, _ = FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,
+                                       list_limit=N,
+                                       scaling_factor=100)
+            time_fptas_end = time.time()
+            pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, N, max_limit_pareto)
+            pareto_optimal_search_cost = pareto_optimal_solution[-1][1]
+            time_ranking_start = time.tine()
+            best_cost_ranking = average_ranking(N, list_prioritizatoin=list_for_prioritization, capacity=capacity)
+            time_ranking_end = time.time()
+            ### first greedy, then fptas then ranking, then pareto
+            best_costs += np.array([best_cost_greedy, best_cost_fptas, best_cost_ranking, pareto_optimal_search_cost])
+            time_track += np.array([time_greedy_end - time_greedy_start, time_fptas_end - time_fptas_start,
+                                    time_ranking_end - time_ranking_start])
+            list_cost.append(best_costs)
+
+    ##plotting
+    y = np.arange(1, number_of_test_images + 1) / number_of_test_images + 1
+    best_costs = np.array(best_costs)
+    plt.subplot()
+    ###greedy
+    plt.plot(best_costs[:, 0], y, label='greedy')
+    ####fptas
+    plt.plot(best_costs[:, 1], y, label='fptas')
+    ####ranking
+    plt.plot(best_costs[:, 2], y, label='ranking_average')
+    ####pareto
+    plt.plt(best_costs[:, 3], y, label='pareto optimal')
+    plt.xlabel('Search cost')
+    plt.ylabel('Percentage of test images')
+    plt.title('Greedy time={},FPTAS time ={},Ranking_time={}'.format(time_track[0], time_track[1], time_track[2]))
+    plt.legend
+    plt.show()
+
+
 def prediction_forest(headers, feature_length, csv_file_location_test, file_name_random_forest, clf, file_name,
-                      selected_col,n,max_dept,min,save_location_picture):
+                      selected_col):
     chunk_size = 10 ** 4
     forest_model = clf
     # forest_model = pickle.load(open(file_name_random_forest, 'rb'))
@@ -774,18 +863,15 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     local_prob_positive = np.zeros(number_axis)
     local_prob_negative = np.zeros(number_axis)
     #####
-    overall_itime = 0
+    print(selected_col)
     for chunk in pd.read_csv(csv_file_location_test, header=0, chunksize=chunk_size):
         X = chunk[selected_col]
         y = np.array(chunk['label'])
-        start = time.time()
         forest_result_class = forest_model.predict(X)
-        end = time.time()
-        overall_itime += end-start
 
         forest_result_local = forest_model.predict_proba(X)
 
-        #numpy_local = np.array(forest_result_class)
+        numpy_local = np.array(forest_result_class)
         """if np.argmax(forest_result_local,axis=1).all() == numpy_local.all():
             print('true')
         else:
@@ -794,12 +880,13 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         y = np.transpose(y)
         sum += np.sum(y)
         forest_result_local = forest_result_local * 100
-        #array = forest_result_class == y
+        array = forest_result_class == y
         chunk_accuracy += np.count_nonzero(forest_result_class == y)
         chunk_total += np.shape(forest_result_class)[0]
-        #print(chunk_accuracy / chunk_total, 'size', np.shape(forest_result_class)[0], 'chunk acc', chunk_accuracy)
+        print(chunk_accuracy / chunk_total, 'size', np.shape(forest_result_class)[0], 'chunk acc', chunk_accuracy)
 
         for number, prob in enumerate(forest_result_local):
+
             total += 1
             truth = y[number]
             classified = forest_result_class[number]
@@ -816,18 +903,19 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
             local_prob_negative[negative_index] += 1
             local_prob_positive[positve_index] += 1
             if truth == classified:
-
                 local_negative[negative_index] += 1
                 local_positive[positve_index] += 1
                 model_accuracy += 1
             #####
             #####
+    print(local_negative, local_positive)
 
     # print(prob/10,'positive',classified,truth,np.argmax(prob))
     # print(prob/10,'negative',classified,truth,np.argmax(prob))
     print(model_accuracy / total, total)
     accuracy_negative = []
     accuracy_positve = []
+    print(sum)
     for i in range(number_axis):
         if local_positive[i]:
             accuracy_positve.append(local_positive[i] / local_prob_positive[i])
@@ -842,14 +930,14 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
 
     fig, ax = plt.subplots()
     line = ax.plot(x_axis, accuracy_positve, label='positve')
+
     line2 = ax.plot(x_axis, accuracy_negative, label='negative')
     ax.legend()
     plt.xlabel('probability from random forest')
     plt.ylabel('percentage of matches')
-    plt.title('Random_forest n_estimator ={}, max_features = {},\n max_depth = {}, min_leaf_node ={},\n accuracy={},prediction time={}'.format(n,len(selected_col),max_dept,min,model_accuracy/total,overall_itime))
-    plt.savefig(save_location_picture)
-    plt.close(fig)
-    return model_accuracy/total, overall_itime
+    plt.title('Random_forest n_estimator =1000 , max_features = number of features')
+    plt.show()
+    pickle.dump(clf, open(file_name, 'wb'))
 
 
 def pareto_optimal(result_forest, actual_cost, capacity, N, limit):
@@ -935,35 +1023,31 @@ def greedy_mine(N, capacity, weight_cost):
 
     return best_cost, best_comb, best_value
 
-def average_ranking(N, list_prioritizatoin,capacity):
+
+def average_ranking(N, list_prioritizatoin, capacity):
     # cost , prob
     ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
     ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
-    ranking_cost =np.array( sorted(ranking_cost, key=lambda x: x[1], reverse=False))
-    ranking_prob =np.array( sorted(ranking_prob, key=lambda x: x[1], reverse=False))
-    ranked_array =[]
+    ranking_cost = np.array(sorted(ranking_cost, key=lambda x: x[1], reverse=False))
+    ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    ranked_array = []
 
     for i in range(len(list_prioritizatoin)):
-        local_rank_cost = np.argwhere(ranking_cost[:,0]==i)
-        local_rank_prob = np.argwhere(ranking_prob[:,0]==i)
-        average = local_rank_cost+local_rank_prob/2
-        ranked_array.append((i,average))
+        local_rank_cost = np.argwhere(ranking_cost[:, 0] == i)
+        local_rank_prob = np.argwhere(ranking_prob[:, 0] == i)
+        average = local_rank_cost + local_rank_prob / 2
+        ranked_array.append((i, average))
     ranked_array = np.array(sorted(ranked_array, key=lambda x: x[1], reverse=False))
-    return_rank = ranked_array[:,0][:N]
-    local_capacity =0
+    return_rank = ranked_array[:, 0][:N]
+    local_capacity = 0
     print(return_rank)
-    for j,i in enumerate(return_rank):
+    for j, i in enumerate(return_rank):
         i = int(i)
         local_capacity += list_prioritizatoin[i][0]
         if local_capacity > capacity:
             local_capacity -= list_prioritizatoin[i][0]
 
-
-
-
-
-    return  local_capacity
-
+    return local_capacity
 
 
 def handle_data_for_test_image(positive, feature_length, csv_file_location_kmeans):
@@ -988,11 +1072,10 @@ def handle_data_for_test_image(positive, feature_length, csv_file_location_kmean
     return headers
 
 
-# cameras =read_images_binary(image_bin_location)
+cameras = read_images_binary(image_bin_location)
 
 # image_array = get_details_from_database()
-# image_array =add_feature_location(database_locatiom)
-
+image_array = add_feature_location(database_locatiom)
 
 print('task1 complete')
 # positive, negative = make_training_data(cameras, image_array)
@@ -1012,43 +1095,29 @@ print('all the csv files are ready')
 ###remove this
 headers = create_headers(feature_length)
 headers.append('label')
-N = [100, 500, 700,1000]
-max_depth = [300, 1000, 4000, 8000]
-min_leaf_nodes = [1, 3, 10, 20]
-#N =[1000]
-#max_depth = [10]
-#min_leaf_nodes =[1]
-accuracy_list=[['N','max_depth','min_samples_leaf','accuracy','time']]
-for feature in range(2):
-    name = feature_selection(feature)
-    save_location = save_location_overall+name
-    for n in N:
-        for max_dept in max_depth:
-            for min in min_leaf_nodes:
-                print("N={},Max_depth={},min_leaf={},feature={}".format(n,max_dept,min,feature))
-                save_location= save_location+'/'
-                save_location_local= save_location + 'N=' + str(n) + 'max_depth=' + str(max_dept) + 'min_leaf=' + str(min)
-                save_location_forest = save_location_local+'.sav'
-                save_location_picture = save_location_local+'.png'
-                clf,selected_columns= random_forest_chunks(headers, feature_length, csv_file_location_400000,
-                                                           save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature)
-            #clf = pickle.load(open(file_name_random_forest, 'rb'))
+###
+# clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
+# k_means(headers,feature_length,csv_file_location,file_name)
+selected_columns = ['1', '2', '3', '4', '5', '7', '8', '12', '15', '16', '19', '20', '21', '24', '28', '38', '49', '66',
+                    '81', '95']
+print("kmeans")
+print("random forest saved")
+# k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+search_cost = search_cost_calculation(headers, feature_length, csv_file_location_kmeans, file_name_kmeans,
+                                      number_of_clusters)
 
-                accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
-                                                    file_name=save_location_forest, selected_col=selected_columns, n=n, max_dept=max_dept, min=min, save_location_picture=save_location_picture)
-                accuracy_list.append([str(n), str(max_dept), str(min), str(accuracy), str(local_time)])
+# print(search_cost)
+# clf = pickle.load(open(file_name_random_forest, 'rb'))
 
-save_location_csv =save_location_overall+'final_result.csv'
-with open(save_location_csv, 'w') as csvFile:
-    writer = csv.writer(csvFile)
-    writer.writerows(accuracy_list)
-csvFile.close()
-
-
-
+# prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf,file_name= file_name_random_forest,selected_col=selected_columns)
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
-
+N = 1000
+file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1"
+file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+capacity = 10000000
+final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
+              image_array, N)
 """
 #Selectkbest -Univariate selection using  chi2  statistical test for non negative values
 #https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e 0.629
