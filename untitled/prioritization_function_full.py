@@ -863,7 +863,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             number_of_test_images += 1
             print(number_of_test_images)
             # making data frame
-            if len(image.positive_descriptor)==0:
+            if len(image.poistive_descriptor)==0:
                 descriptors = image.negative_descriptor
             else :
                 descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
