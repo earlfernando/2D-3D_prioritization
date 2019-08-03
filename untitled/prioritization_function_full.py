@@ -793,7 +793,7 @@ def add_descriptors_to_image_array(image_array, cameras):
             number_of_test_images += 1
             print(number_of_test_images)
             # making data frame
-            image_Data_frame = pd.DataFrame(image.poistive_descriptor, columns=headers)
+            image_Data_frame = pd.DataFrame(image.descriptor, columns=headers)
             X = image_Data_frame[selected_columns]
             print(len(image.poistive_descriptor))
             X_kmeans = image_Data_frame[headers]
@@ -862,7 +862,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             number_of_test_images += 1
             print(number_of_test_images)
             # making data frame
-            image_Data_frame = pd.DataFrame(image.poistive_descriptor, columns=headers)
+            image_Data_frame = pd.DataFrame(image.descriptor, columns=headers)
+            if N>len(image.descriptor):
+                N=len(image.descriptor)
             X = image_Data_frame[selected_columns]
             print(len(image.poistive_descriptor))
             X_kmeans = image_Data_frame[headers]
