@@ -384,7 +384,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
     ####chunk forest
     for i, chunk in enumerate(pd.read_csv(csv_file_location, header=0, chunksize=chunk_size)):
         X = chunk[selected_columns]
-        print(i)
         y = chunk['label']
         clf.fit(X, y)
         if local_counter < n:
