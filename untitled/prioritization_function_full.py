@@ -919,7 +919,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:, 2], y, label='pareto optimal')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={},Ranking_time={},N={}'.format(time_track[0], time_track[1]))
+    plt.title('Greedy time={},Ranking_time={},N={}'.format(time_track[0], time_track[1],N))
     plt.savefig(save_location_picture)
     plt.close()
     plt.show()
