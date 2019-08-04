@@ -47,7 +47,7 @@ number_of_clusters = 10000
 image_bin_location_overall = "/home/earl/Thesis/GreatCourt/images.bin"
 #point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
 location_small_dataset ="/home/earlfernando/greatCourtTrinity/dataset_20000/training_Data_RandomForest_10000.csv"
-csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/dataset_20000/test_kmeans_modified.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
 max_cost = 20000
 
 

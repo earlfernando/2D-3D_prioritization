@@ -854,7 +854,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     time_track = np.zeros(2)
     list_cost = []
     ###parameter for pareto optimal
-    max_limit_pareto = np.amax(search_cost) * 0.2
+    max_limit_pareto = np.amax(search_cost) * 0.1
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
     number_of_test_images = 0
@@ -920,6 +920,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={},Ranking_time={},N={}'.format(time_track[0], time_track[1],N))
+    plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
     plt.show()
