@@ -346,7 +346,7 @@ def feature_selection(number):
     return  name
 
 
-def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n,max_dept,min,save_location_forest,feature_mode,location_small_dataset):
+def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n,max_dept,min,save_location_forest,feature_mode,location_small_dataset,chunk):
     # df = pd.DataFrame.from_records(values, columns=headers)
     chunk_size = 10 ** 4
     counter = 0
@@ -355,9 +355,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
     clf = RandomForestClassifier(n_estimators=n,warm_start= True, max_features= None,n_jobs=-1,max_depth=max_dept,min_samples_leaf=min,class_weight="balanced",
                                  random_state=42,oob_score= True)
     # clf = RandomForestClassifier(n_estimators=1000,max_features=None,max_depth=10,n_jobs=-1,oob_score= True,random_state= 42)
-    chunk = pd.read_csv(csv_file_location)
     np.random.seed(123)
-    chunk = shuffle(chunk)
     print("chunk read")
     local_counter =1
 
@@ -1038,6 +1036,7 @@ min_leaf_nodes = [1, 3, 10, 20]
 #max_depth = [10]
 #min_leaf_nodes =[1]
 accuracy_list=[['N','max_depth','min_samples_leaf','accuracy','time']]
+chunk = pd.read_csv(csv_file_location_400000)
 for feature in range(3):
     name = feature_selection(feature)
     save_location = save_location_overall+name
@@ -1050,7 +1049,7 @@ for feature in range(3):
                 save_location_forest = save_location_local+'.sav'
                 save_location_picture = save_location_local+'.png'
                 clf,selected_columns= random_forest_chunks(headers, feature_length, csv_file_location_400000,
-                                                           save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature,location_small_dataset=location_small_dataset)
+                                                           save_location_forest, n, max_dept, min, save_location_forest,feature_mode=feature,location_small_dataset=location_small_dataset,chunk=chunk)
             #clf = pickle.load(open(file_name_random_forest, 'rb'))
 
                 accuracy,local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test, save_location_forest, clf,
