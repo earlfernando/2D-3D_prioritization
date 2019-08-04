@@ -910,7 +910,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
     list_cost = np.array(list_cost)
     print(np.size(list_cost),np.size(y),list_cost,y)
-    fig,_=plt.subplot()
+    plt.figure()
     ###greedy
     plt.plot(list_cost[:, 0], y, label='greedy')
     ####ranking
@@ -921,7 +921,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={},Ranking_time={},N={}'.format(time_track[0], time_track[1]))
     plt.savefig(save_location_picture)
-    plt.close(fig)
+    plt.close()
     plt.show()
 
 
