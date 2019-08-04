@@ -341,6 +341,8 @@ def feature_selection(number):
         name = 'noFeature'
     if number == 1:
         name = 'correlation'
+    if number == 2:
+        name = 'correlation+pvalue'
     return  name
 
 
@@ -361,6 +363,9 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
 
     if feature_mode ==0:
         selected_columns = create_headers(feature_length)
+        X = chunk[selected_columns]
+        y= chunk['label']
+        clf.fit(X,y)
 
     if feature_mode==1 :
         """
@@ -369,9 +374,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
     ####
         
         """
-
-        local_chunk =  pd.read_csv(location_small_dataset)
-        data = local_chunk.iloc[:, 0:-1]
+        data = chunk.iloc[:, 0:-1]
         corr = data.corr()
         # sns.heatmap(corr)
         # plt.show()
@@ -382,15 +385,30 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
                     if columns[j]:
                         columns[j] = False
         selected_columns = data.columns[columns]
+        data = data[selected_columns]
         selected_columns = selected_columns[1:].values
-    ####chunk forest
-    for i, chunk in enumerate(pd.read_csv(csv_file_location, header=0, chunksize=chunk_size)):
-        X = chunk[selected_columns]
-        print(i)
-        y = chunk['label']
-        clf.fit(X, y)
-        if local_counter < n:
-            clf.n_estimators += 1
+        data = pd.DataFrame(data=data, columns=selected_columns)
+        clf.fit(data.values, chunk['label'])
+    if feature_mode ==2:
+        data = chunk.iloc[:, 0:-1]
+        corr = data.corr()
+        # sns.heatmap(corr)
+        # plt.show()
+        columns = np.full((corr.shape[0],), True, dtype=bool)
+        for i in range(corr.shape[0]):
+            for j in range(i + 1, corr.shape[0]):
+                if corr.iloc[i, j] >= 0.5:
+                    if columns[j]:
+                        columns[j] = False
+        selected_columns = data.columns[columns]
+        data = data[selected_columns]
+        selected_columns = selected_columns[1:].values
+        SL = 0.3
+        data_modeled, selected_columns = backwardElimination(data.iloc[:, 0:-1].values, data.iloc[:, -1].values, SL,
+                                                             selected_columns)
+        data = pd.DataFrame(data=data_modeled, columns=selected_columns)
+        clf.fit(data.values, chunk['label'])
+
 
     # print(selected_columns)
 
@@ -1020,7 +1038,7 @@ min_leaf_nodes = [1, 3, 10, 20]
 #max_depth = [10]
 #min_leaf_nodes =[1]
 accuracy_list=[['N','max_depth','min_samples_leaf','accuracy','time']]
-for feature in range(2):
+for feature in range(3):
     name = feature_selection(feature)
     save_location = save_location_overall+name
     for n in N:
