@@ -356,6 +356,7 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
     chunk = pd.read_csv(csv_file_location)
     np.random.seed(123)
     chunk = shuffle(chunk)
+    print("chunk read")
     local_counter =1
 
     if feature_mode ==0:
@@ -388,7 +389,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
         print(i)
         y = chunk['label']
         clf.fit(X, y)
-        print(clf.oob_score_)
         if local_counter < n:
             clf.n_estimators += 1
 
