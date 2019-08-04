@@ -387,7 +387,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name,n
         print(i)
         y = chunk['label']
         clf.fit(X, y)
-        print(clf.oob_score_)
         if local_counter < n:
             clf.n_estimators += 1
 
