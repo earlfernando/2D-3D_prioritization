@@ -860,8 +860,10 @@ def ratio_test(headers,selected_colums,data_frame,k_means_model):
         best_distance = sorted_array[:,-1]
         second_best_distance = sorted_array[:,-2]
         ratio_array = np.divide(best_distance,second_best_distance)
-        rows_to_be_deleted = np.where(ratio_array>0.7)
+        rows_to_be_deleted = np.where(ratio_array>0.7)[0]
         print(rows_to_be_deleted)
+        print(type(X))
+
         X = np.delete(X,rows_to_be_deleted,axis=0)
         X_forest = np.delete(X_forest,rows_to_be_deleted,axis=0)
         return X_forest,X
