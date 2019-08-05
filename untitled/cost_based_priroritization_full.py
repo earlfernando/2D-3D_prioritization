@@ -861,9 +861,9 @@ def ratio_test(headers,selected_colums,data_frame,k_means_model):
         ratio_array = np.divide(best_distance,second_best_distance)
         rows_to_be_deleted = np.where(ratio_array>0.7)[0]
         print(len(rows_to_be_deleted))
-        data_frame.drop(rows_to_be_deleted,axis=0)
-        X = data_frame[headers]
-        X_forest = data_frame[selected_columns]
+        new_data = data_frame.drop(rows_to_be_deleted,axis=0)
+        X = new_data[headers]
+        X_forest = new_data[selected_columns]
         return X_forest,X
 
 
