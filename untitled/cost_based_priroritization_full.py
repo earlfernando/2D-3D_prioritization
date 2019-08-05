@@ -845,6 +845,25 @@ def add_descriptors_to_image_array(image_array, cameras):
     plt.title('Greedy time={},FPTAS time ={},Ranking_time={}'.format(time_track[0], time_track[1], time_track[2]))
     plt.legend
     plt.show()"""
+def ratio_test(headers,data_frame,k_means_model):
+        """
+        Applys lowes ratio test
+        :param headers: headers for descriptors
+        :param data_frame: a datafram of descriptors
+        :param k_means_model: k means model used for cluster
+        :return: modiefied X based on ratio test
+        """
+        X = data_frame[headers]
+        distances = k_means_model.transform(X)
+        sorted_array = np.sort(distances)
+        best_distance = sorted_array[:,-1]
+        second_best_distance = sorted_array[:,-2]
+        ratio_array = np.divide(best_distance,second_best_distance)
+        rows_to_be_deleted = np.where(ratio_array>0.7)
+        data_frame.drop(rows_to_be_deleted,axis=0)
+
+        return data_frame
+
 
 def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
                   selected_columns, image_array,save_location_picture):
@@ -870,6 +889,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                 descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
+            ##data fram modification
+            image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
 
             X = image_Data_frame[selected_columns]
 
