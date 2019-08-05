@@ -845,7 +845,7 @@ def add_descriptors_to_image_array(image_array, cameras):
     plt.title('Greedy time={},FPTAS time ={},Ranking_time={}'.format(time_track[0], time_track[1], time_track[2]))
     plt.legend
     plt.show()"""
-def ratio_test(headers,data_frame,k_means_model):
+def ratio_test(headers,selected_colums,data_frame,k_means_model):
         """
         Applys lowes ratio test
         :param headers: headers for descriptors
@@ -854,15 +854,16 @@ def ratio_test(headers,data_frame,k_means_model):
         :return: modiefied X based on ratio test
         """
         X = data_frame[headers]
+        X_forest = data_frame[selected_columns]
         distances = k_means_model.transform(X)
         sorted_array = np.sort(distances)
         best_distance = sorted_array[:,-1]
         second_best_distance = sorted_array[:,-2]
         ratio_array = np.divide(best_distance,second_best_distance)
         rows_to_be_deleted = np.where(ratio_array>0.7)
-        data_frame.drop(rows_to_be_deleted,axis=0)
-
-        return data_frame
+        X = np.delete(X,rows_to_be_deleted,axis=0)
+        X_forest = np.delete(X_forest,rows_to_be_deleted,axis=0)
+        return X_forest,X
 
 
 def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
@@ -891,10 +892,10 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             ##data fram modification
             image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
+            X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
+            #X = image_Data_frame[selected_columns]
 
-            X = image_Data_frame[selected_columns]
-
-            X_kmeans = image_Data_frame[headers]
+            #X_kmeans = image_Data_frame[headers]
             # prediction
             result_kmeans = kmeans_model.predict(X_kmeans)
             result_forest = forest_model.predict_proba(X)
