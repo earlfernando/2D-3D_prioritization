@@ -858,7 +858,7 @@ def ratio_test(headers,selected_colums,data_frame,k_means_model):
         sorted_array = np.sort(distances)
         best_distance = sorted_array[:,-1]
         second_best_distance = sorted_array[:,-2]
-        ratio_array = np.divide(best_distance,second_best_distance)
+        ratio_array = np.divide(second_best_distance,best_distance)
         rows_to_be_deleted = np.where(ratio_array>0.7)[0]
         print(len(rows_to_be_deleted))
         new_data = data_frame.drop(rows_to_be_deleted,axis=0)
@@ -871,12 +871,12 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                   selected_columns, image_array,save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
-    best_numbers = np.zeros(4)
-    time_track = np.zeros(3)
+    best_numbers = np.zeros(3)
+    time_track = np.zeros(2)
     list_cost = []
     ###parameter for pareto optimal
     max_limit_pareto = np.amax(search_cost) * 0.1
-    scaling_factor_fptas = np.amax(search_cost)*0.5
+    #scaling_factor_fptas = np.amax(search_cost)*0.5
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
     number_of_test_images = 0
@@ -892,11 +892,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             ##data fram modification
-            #image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
-            X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
-            #X = image_Data_frame[selected_columns]
+            image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
+            #X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
+            X = image_Data_frame[selected_columns]
 
-            #X_kmeans = image_Data_frame[headers]
+            X_kmeans = image_Data_frame[headers]
             # prediction
             result_kmeans = kmeans_model.predict(X_kmeans)
             result_forest = forest_model.predict_proba(X)
@@ -911,10 +911,10 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             _, _, greedy_N = greedy_mine(capacity=capacity, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
             print('greedy over')
-            time_fptas_start = time.time()
-            _, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
-            time_fptas_end = time.time()
-            print("fptas")
+            #time_fptas_start = time.time()
+            #_, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
+            #time_fptas_end = time.time()
+            #print("fptas")
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
             pareto_optimal_N= pareto_optimal_solution[-1][2]
             print('pareto over')
@@ -922,9 +922,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             average_N = average_ranking( list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
             ### first greedy, then fptas then ranking, then pareto
-            best_numbers += np.array([greedy_N, average_N, pareto_optimal_N,fptas_N])
+            best_numbers += np.array([greedy_N, average_N, pareto_optimal_N])
             time_track += np.array([time_greedy_end - time_greedy_start,
-                                    time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start])
+                                    time_ranking_end - time_ranking_start])
             list_cost.append(np.copy(best_numbers))
 
     ##plotting
@@ -939,10 +939,10 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:, 1], y, label='ranking_average')
     ####pareto
     plt.plot(list_cost[:, 2], y, label='pareto optimal')
-    plt.plot(list_cost[:, 3], y, label='ranking_average')
+   # plt.plot(list_cost[:, 3], y, label='ranking_average')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={},Ranking_time={},FPTAS_time ={},capacity={}'.format(time_track[0], time_track[1],time_track[2],capacity))
+    plt.title('Greedy time={},Ranking_time={},FPTAS_time ={},capacity={}'.format(time_track[0], time_track[1],capacity))
     plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
@@ -1319,7 +1319,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot.png"
-capacity = 200
+capacity = 10000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array,save_location_picture)
 """
