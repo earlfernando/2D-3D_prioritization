@@ -892,7 +892,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             ##data fram modification
-            image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
+            #image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
             #X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
             X = image_Data_frame[selected_columns]
 
@@ -942,7 +942,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
    # plt.plot(list_cost[:, 3], y, label='ranking_average')
     plt.xlabel('Search cost')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={},Ranking_time={},FPTAS_time ={},capacity={}'.format(time_track[0], time_track[1],capacity))
+    plt.title('Greedy time={},Ranking_time={},capacity={}'.format(time_track[0], time_track[1],capacity))
     plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
@@ -1319,7 +1319,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot.png"
-capacity = 10000
+capacity = 20000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array,save_location_picture)
 """
