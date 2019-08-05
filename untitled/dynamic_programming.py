@@ -1,5 +1,6 @@
 #coding: utf-8
 from decorators import memoized
+import numpy as np
 
 
 def dynamic_programming(number, capacity, weight_cost,list_limit):
@@ -39,4 +40,7 @@ def dynamic_programming(number, capacity, weight_cost,list_limit):
                 counter +=1
                 result[i - 1] = 1
                 j -= weight_cost[i - 1][0]
-    return bestvalue(len(weight_cost), capacity), result
+    result = np.arrary(result)
+    result =result[0]
+    number_of_returns= np.sum(np.where(result==1))
+    return bestvalue(len(weight_cost), capacity), number_of_returns
