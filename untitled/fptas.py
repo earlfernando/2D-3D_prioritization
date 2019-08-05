@@ -2,7 +2,7 @@
 from dynamic_programming import dynamic_programming
 
 
-def FPTAS(number, capacity, weight_cost,list_limit, scaling_factor=4):
+def FPTAS(number, capacity, weight_cost,, scaling_factor=4):
     """Fully polynomial-time approximation scheme method for solving knapsack problem
 
     :param number: number of existing items
@@ -14,4 +14,4 @@ def FPTAS(number, capacity, weight_cost,list_limit, scaling_factor=4):
     """
     new_capacity = int(float(capacity) / scaling_factor)
     new_weight_cost = [(float(weight) / scaling_factor , cost) for weight, cost in weight_cost]
-    return dynamic_programming(number, new_capacity, new_weight_cost,list_limit)
+    return dynamic_programming(number, new_capacity, new_weight_cost)

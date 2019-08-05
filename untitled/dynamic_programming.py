@@ -3,7 +3,7 @@ from decorators import memoized
 import numpy as np
 
 
-def dynamic_programming(number, capacity, weight_cost,list_limit):
+def dynamic_programming(number, capacity, weight_cost):
     """
     Solve the knapsack problem by finding the most valuable
     subsequence of `weight_cost` subject that weighs no more than

@@ -888,7 +888,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_greedy_end = time.time()
             print('greedy over')
             time_fptas_start = time.time()
-            _, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,list_limit=N,scaling_factor=100)
+            _, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=100)
             time_fptas_end = time.time()
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
             pareto_optimal_N= pareto_optimal_solution[-1][2]
