@@ -891,6 +891,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_fptas_start = time.time()
             _, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
             time_fptas_end = time.time()
+            print("fptas")
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
             pareto_optimal_N= pareto_optimal_solution[-1][2]
             print('pareto over')
@@ -1296,7 +1297,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot.png"
-capacity = 200000
+capacity = 200
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array,save_location_picture)
 """
