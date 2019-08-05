@@ -1231,7 +1231,6 @@ def average_ranking(list_prioritizatoin, capacity):
         local_capacity += list_prioritizatoin[i][0]
         if local_capacity > capacity:
             local_capacity -= list_prioritizatoin[i][0]
-        else :
             return number_of_matches+1
 
     return number_of_matches+1
