@@ -861,6 +861,7 @@ def ratio_test(headers,selected_colums,data_frame,k_means_model):
         second_best_distance = sorted_array[:,-2]
         ratio_array = np.divide(best_distance,second_best_distance)
         rows_to_be_deleted = np.where(ratio_array>0.7)
+        print(rows_to_be_deleted)
         X = np.delete(X,rows_to_be_deleted,axis=0)
         X_forest = np.delete(X_forest,rows_to_be_deleted,axis=0)
         return X_forest,X
@@ -891,7 +892,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             ##data fram modification
-            image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
+            #image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
             X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
             #X = image_Data_frame[selected_columns]
 
