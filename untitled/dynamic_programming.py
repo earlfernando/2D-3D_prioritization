@@ -40,7 +40,8 @@ def dynamic_programming(number, capacity, weight_cost):
                 counter +=1
                 result[i - 1] = 1
                 j -= weight_cost[i - 1][0]
-    result = np.arrary(result)
+            
+    result = np.array(result)
     result =result[0]
     number_of_returns= np.sum(np.where(result==1))
     return bestvalue(len(weight_cost), capacity), number_of_returns
