@@ -854,15 +854,13 @@ def ratio_test(headers,selected_colums,data_frame,k_means_model):
         :return: modiefied X based on ratio test
         """
         X = data_frame[headers]
-        X_forest = data_frame[selected_columns]
         distances = k_means_model.transform(X)
         sorted_array = np.sort(distances)
         best_distance = sorted_array[:,-1]
         second_best_distance = sorted_array[:,-2]
         ratio_array = np.divide(best_distance,second_best_distance)
         rows_to_be_deleted = np.where(ratio_array>0.7)[0]
-        print(rows_to_be_deleted)
-        print(type(X))
+        print(len(rows_to_be_deleted))
         data_frame.drop(rows_to_be_deleted,axis=0)
         X = data_frame[headers]
         X_forest = data_frame[selected_columns]
@@ -1196,7 +1194,6 @@ def greedy_mine(capacity, weight_cost):
     ratios = [(index, item[1] / float(item[0])) for index, item in enumerate(weight_cost)]
     ratios = sorted(ratios, key=lambda x: x[1], reverse=True)
     best_comb = []
-    print(len(ratios))
 
     best_cost = 0
     for i in range(len(ratios)):
