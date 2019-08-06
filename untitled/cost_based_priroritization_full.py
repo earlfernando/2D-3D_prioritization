@@ -866,6 +866,64 @@ def ratio_test(headers,selected_colums,data_frame,k_means_model):
         X_forest = new_data[selected_columns]
         return X_forest,X
 
+def fptas(values,weights,n_items,capacity,scaling_factor):
+    #scaling_factor = (correctness* n_items)/max_cost
+    new_capacity = int(float(capacity) / scaling_factor)
+    new_weight_cost = [int(round(float(weight) / scaling_factor)  )for weight in weights]
+
+    return  knapsack_dp(values,new_weight_cost,n_items,new_capacity)
+
+
+
+def knapsack_dp(values,weights,n_items,capacity,return_all=False):
+
+    check_inputs(values,weights,n_items,capacity)
+
+    table = np.zeros((n_items+1,capacity+1),dtype=np.float32)
+    keep = np.zeros((n_items+1,capacity+1),dtype=np.float32)
+
+    for i in range(1,n_items+1):
+        for w in range(0,capacity+1):
+            wi = weights[i-1] # weight of current item
+            vi = values[i-1] # value of current item
+            if (wi <= w) and (vi + table[i-1,w-wi] > table[i-1,w]):
+                table[i,w] = vi + table[i-1,w-wi]
+                keep[i,w] = 1
+            else:
+                table[i,w] = table[i-1,w]
+
+    picks = []
+    K = capacity
+
+    for i in range(n_items,0,-1):
+        if keep[i,K] == 1:
+            picks.append(i)
+            K -= weights[i-1]
+
+    picks.sort()
+    picks = [x-1 for x in picks] # change to 0-index
+
+   # if return_all:
+      #  max_val = table[n_items,capacity]
+       # return picks,max_val
+    return picks
+
+
+def check_inputs(values,weights,n_items,capacity):
+    # check variable type
+    assert(isinstance(values,list))
+    assert(isinstance(weights,list))
+    assert(isinstance(n_items,int))
+    assert(isinstance(capacity,int))
+    # check value type
+    assert(all(isinstance(val,int) or isinstance(val,float) for val in values))
+    assert(all(isinstance(val,int) for val in weights))
+    # check validity of value
+    assert(all(val >= 0 for val in weights))
+    assert(n_items > 0)
+    assert(capacity > 0)
+
+
 
 def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
                   selected_columns, image_array,save_location_picture):
@@ -876,6 +934,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     list_cost = []
     ###parameter for pareto optimal
     max_limit_pareto = np.amax(search_cost) * 0.1
+    scaling_factor =100
     #scaling_factor_fptas = np.amax(search_cost)*0.5
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
@@ -911,9 +970,14 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             _, _, greedy_N = greedy_mine(capacity=capacity, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
             print('greedy over')
-            #time_fptas_start = time.time()
+            time_fptas_start = time.time()
+            weights_fptas = [cost for cost in actual_cost]
+            values_fptas = [prob for prob in result_forest[:, 0]]
+            picks = fptas(weights=weights_fptas,values=values_fptas,scaling_factor=scaling_factor)
+            print('fptas')
             #_, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
-            #time_fptas_end = time.time()
+            time_fptas_end = time.time()
+            print(time_fptas_end-time_fptas_start)
             #print("fptas")
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
             pareto_optimal_N= pareto_optimal_solution[-1][2]
