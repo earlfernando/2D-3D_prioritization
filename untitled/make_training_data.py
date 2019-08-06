@@ -33,20 +33,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-database_locatiom = "/home/earlfernando/oldHospital/old_hospital.db"
-image_bin_location = "/home/earlfernando/oldHospital/images.bin"
-csv_file_location_400000 = "/home/earlfernando/oldHospital/training_Data_RandomForest_overall.csv"
-images_test_file_location = "/home/earlfernando/oldHospital/dataset_test.txt"
+database_locatiom = "/home/earlfernando/kingscollege/old_hospital.db"
+image_bin_location = "/home/earlfernando/kingscollege/images.bin"
+csv_file_location_400000 = "/home/earlfernando/kingscollege/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/kingscollege/dataset_test.txt"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earlfernando/oldHospital/test_model_kmeans.sav"
+file_name_kmeans = "/home/earlfernando/kingscollege/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/kingscollege/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earlfernando/oldHospital/old_hospital.db"
-image_bin_location_overall = "/home/earlfernando/oldHospital/images.bin"
-point3D_location_overall = "/home/earlfernando/oldHospital/points3D.bin"
-csv_file_location_kmeans_test = "/home/earlfernando/oldHospital/test_kmeans_modified.csv"
-csv_file_location_small = "/home/earlfernando/oldHospital/train_forest_small.csv"
+database_location_overall = "/home/earlfernando/kingscollege/kingscollege.db"
+image_bin_location_overall = "/home/earlfernando/kingscollege/images.bin"
+point3D_location_overall = "/home/earlfernando/kingscollege/points3D.bin"
+csv_file_location_kmeans_test = "/home/earlfernando/kingscollege/test_kmeans_modified.csv"
+csv_file_location_small = "/home/earlfernando/kingscollege/train_forest_small.csv"
 max_cost = 20000
 
 
