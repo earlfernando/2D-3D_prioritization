@@ -929,12 +929,12 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                   selected_columns, image_array,save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
-    best_numbers = np.zeros(3)
-    time_track = np.zeros(2)
+    best_numbers = np.zeros(4)
+    time_track = np.zeros(3)
     list_cost = []
     ###parameter for pareto optimal
     max_limit_pareto = np.amax(search_cost) * 0.1
-    scaling_factor =100
+    scaling_factor =10
     #scaling_factor_fptas = np.amax(search_cost)*0.5
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
@@ -973,11 +973,12 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_fptas_start = time.time()
             weights_fptas = [cost for cost in actual_cost]
             values_fptas = [prob for prob in result_forest[:, 0]]
-            picks = fptas(weights=weights_fptas,values=values_fptas,scaling_factor=scaling_factor)
+            picks = fptas(weights=weights_fptas,values=values_fptas,n_items=len(weights_fptas),capacity=capacity,scaling_factor=scaling_factor)
             print('fptas')
             #_, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
             time_fptas_end = time.time()
             print(time_fptas_end-time_fptas_start)
+            fptas_N = len(picks)
             #print("fptas")
             pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
             pareto_optimal_N= pareto_optimal_solution[-1][2]
@@ -986,9 +987,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             average_N = average_ranking( list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
             ### first greedy, then fptas then ranking, then pareto
-            best_numbers += np.array([greedy_N, average_N, pareto_optimal_N])
+            best_numbers += np.array([greedy_N, average_N, pareto_optimal_N,fptas_N])
             time_track += np.array([time_greedy_end - time_greedy_start,
-                                    time_ranking_end - time_ranking_start])
+                                    time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start])
             list_cost.append(np.copy(best_numbers))
 
     ##plotting
@@ -1003,10 +1004,10 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:, 1], y, label='ranking_average')
     ####pareto
     plt.plot(list_cost[:, 2], y, label='pareto optimal')
-   # plt.plot(list_cost[:, 3], y, label='ranking_average')
+    plt.plot(list_cost[:, 3], y, label='FPTAS')
     plt.xlabel('Number of descriptors')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\\,capacity={:10.2f}'.format(time_track[0], time_track[1],capacity))
+    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\\,capacity={:10.2f},FPTAS time ={:10.2f}'.format(time_track[0], time_track[1],capacity))
     plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
