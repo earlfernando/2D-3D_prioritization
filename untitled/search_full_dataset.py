@@ -847,7 +847,7 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     ax.legend()
     plt.xlabel('probability from random forest')
     plt.ylabel('percentage of matches')
-    plt.title('Random_forest n_estimator ={}, max_features = {},\n max_depth = {}, min_leaf_node ={},\n accuracy={},prediction time={}'.format(n,len(selected_col),max_dept,min,model_accuracy/total,overall_itime))
+    plt.title('Random_forest n_estimator ={}, max_features = {},\n max_depth = {}, min_leaf_node ={},\n accuracy={:10.2f},prediction time={:10.2f}'.format(n,len(selected_col),max_dept,min,model_accuracy/total,overall_itime))
     plt.savefig(save_location_picture)
     plt.close(fig)
     return model_accuracy/total, overall_itime
