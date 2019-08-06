@@ -33,7 +33,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-database_locatiom = "/home/earlfernando/kingscollege/old_hospital.db"
+database_locatiom = "/home/earlfernando/kingscollege/kingscollege.db"
 image_bin_location = "/home/earlfernando/kingscollege/images.bin"
 csv_file_location_400000 = "/home/earlfernando/kingscollege/training_Data_RandomForest_overall.csv"
 images_test_file_location = "/home/earlfernando/kingscollege/dataset_test.txt"
