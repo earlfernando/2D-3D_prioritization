@@ -33,19 +33,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(150000000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-database_locatiom = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
-image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
-images_test_file_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/dataset_test.txt"
+database_locatiom = "/home/earlfernando/oldHospital/old_hospital.db"
+image_bin_location = "/home/earlfernando/oldHospital/images.bin"
+csv_file_location_400000 = "/home/earlfernando/oldHospital/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/oldHospital/dataset_test.txt"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+file_name_kmeans = "/home/earlfernando/oldHospital/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
-image_bin_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
-point3D_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/points3D.bin"
-csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
+database_location_overall = "/home/earlfernando/oldHospital/greatCourt_database.db"
+image_bin_location_overall = "/home/earlfernando/oldHospital/images.bin"
+point3D_location_overall = "/home/earlfernando/oldHospital/points3D.bin"
+#csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/oldHospital/test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -1384,7 +1385,7 @@ headers.append('label')
 # k_means(headers,feature_length,csv_file_location,file_name)
 #selected_columns = ['1', '2', '3', '4', '5', '7', '8', '12', '15', '16', '19', '20', '21', '24', '28', '38', '49', '66',
 #                    '81', '95']
-selected_columns = create_headers(feature_lengtht)
+selected_columns = create_headers(feature_length)
 print("kmeans")
 print("random forest saved")
 # k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
@@ -1397,16 +1398,33 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 # prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf,file_name= file_name_random_forest,selected_col=selected_columns)
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
+#csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
+file_name_kmeans = "/home/earlfernando/oldHospital/test_model_kmeans.sav"
+file_name_random_forest = "/home/earlfernando/oldHospital//dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 
-file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
-file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
+save_location_picture = "/home/earlfernando/oldHospital/capacity_plots_best_forest"
+#file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
+#file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+#save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
 capacity = [3000,5000,7000,10000]
 for i in capacity:
     save_location_picture_local = save_location_picture+ str(capacity)+".png"
-    final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
+    final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, i, selected_columns,
                   image_array,save_location_picture_local)
 
+
+
+
+
+"""Detail strings
+
+Great Court
+file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
+file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
+
+
+"""
 """
 #Selectkbest -Univariate selection using  chi2  statistical test for non negative values
 #https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e 0.629
