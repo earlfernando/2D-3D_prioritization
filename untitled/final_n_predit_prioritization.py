@@ -33,20 +33,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(150000000)
 #csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-database_locatiom = "/home/earlfernando/oldHospital/old_hospital.db"
-image_bin_location = "/home/earlfernando/oldHospital/images.bin"
-csv_file_location_400000 = "/home/earlfernando/oldHospital/training_Data_RandomForest_overall.csv"
-images_test_file_location = "/home/earlfernando/oldHospital/dataset_test.txt"
+database_locatiom = "/home/earlfernando/kingscollege/kingscollge.db"
+image_bin_location = "/home/earlfernando/kingscollege/images.bin"
+csv_file_location_400000 = "/home/earlfernando/kingscollege/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/kingscollege/dataset_test.txt"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earlfernando/oldHospital/test_model_kmeans.sav"
+file_name_kmeans = "/home/earlfernando/kingscollege/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/kingscollege/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earlfernando/oldHospital/greatCourt_database.db"
-image_bin_location_overall = "/home/earlfernando/oldHospital/images.bin"
-point3D_location_overall = "/home/earlfernando/oldHospital/points3D.bin"
+database_location_overall = "/home/earlfernando/kingscollege/greatCourt_database.db"
+image_bin_location_overall = "/home/earlfernando/kingscollege/images.bin"
+point3D_location_overall = "/home/earlfernando/kingscollege/points3D.bin"
 #csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
-csv_file_location_kmeans_test = "/home/earlfernando/oldHospital/test_kmeans_modified.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/kingscollege/test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -988,7 +988,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             solution_average= average_ranking( list_prioritizatoin=list_for_prioritization, N=N)
             time_ranking_end = time.time()
             ### first greedy, then fptas then ranking, then pareto
-            best_numbers += np.array([solution_greedy, solution_average, solution_pareto])
+            best_numbers += np.array([solution_greedy[0], solution_average[0], solution_pareto[0]])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start])
             list_cost.append(np.copy(best_numbers))
@@ -1015,8 +1015,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.savefig(save_location_picture_N)
     plt.close()
     plt.figure()
-    greedy_divide= np.divide(list[:,0],list[:,2])
-    average_divide = np.divide(list[:,1],list[:,2])
+    greedy_divide= np.divide(list_cost[:,0],list_cost[:,2])
+    average_divide = np.divide(list_cost[:,1],list_cost[:,2])
     plt.plot(greedy_divide,y,label= 'greedy')
     plt.plot(average_divide,y,label= 'ranking_average')
     plt.xlabel('Capacity/pareto optimal capavity')
@@ -1472,11 +1472,11 @@ print("kmeans")
 print("random forest saved")
 
 selected_columns = create_headers(feature_length)
-csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
-file_name_kmeans = "/home/earlfernando/oldHospital/test_model_kmeans.sav"
-file_name_random_forest = "/home/earlfernando/oldHospital//dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
+csv_file_location_kmeans = "/home/earlfernando/kingscollege/train_kmeans.csv"
+file_name_kmeans = "/home/earlfernando/kingscollege/test_model_kmeans.sav"
+file_name_random_forest = "/home/earlfernando/kingscollege/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 
-save_location_picture = "/home/earlfernando/oldHospital/best_plot"
+save_location_picture = "/home/earlfernando/kingscollege/best_plot"
 #k_means(headers,feature_length,csv_file_location_kmeans,file_name_kmeans)
 k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 
