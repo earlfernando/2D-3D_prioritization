@@ -1382,8 +1382,9 @@ headers.append('label')
 ###
 # clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
 # k_means(headers,feature_length,csv_file_location,file_name)
-selected_columns = ['1', '2', '3', '4', '5', '7', '8', '12', '15', '16', '19', '20', '21', '24', '28', '38', '49', '66',
-                    '81', '95']
+#selected_columns = ['1', '2', '3', '4', '5', '7', '8', '12', '15', '16', '19', '20', '21', '24', '28', '38', '49', '66',
+#                    '81', '95']
+selected_columns = create_headers(feature_lengtht)
 print("kmeans")
 print("random forest saved")
 # k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
@@ -1399,10 +1400,13 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot.png"
-capacity = 10000
-final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
-              image_array,save_location_picture)
+save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot"
+capacity = [3000,5000,7000,10000]
+for i in capacity:
+    save_location_picture_local = save_location_picture+ str(capacity)+".png"
+    final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
+                  image_array,save_location_picture_local)
+
 """
 #Selectkbest -Univariate selection using  chi2  statistical test for non negative values
 #https://towardsdatascience.com/feature-selection-techniques-in-machine-learning-with-python-f24e7da3f36e 0.629
