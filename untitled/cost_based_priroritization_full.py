@@ -991,6 +991,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             truth_average = combinaton_check(truth_actual,combination_average)
             truth_fptas = combinaton_check(truth_actual,combination_fptas)
             ### first greedy, then fptas then ranking, then pareto
+            print(truth_fptas,truth_average,truth_greedy,truth_actual)
             best_numbers += np.array([truth_greedy, truth_average, truth_fptas])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start])
@@ -1020,7 +1021,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
 
 def combinaton_check (positive_length , combination):
     combination = np.array(combination)
-    truth_return = len(np.where(combination<=positive_length))
+    truth_return = len(np.where(combination<=positive_length)[0])
     return  truth_return
 
 
@@ -1396,7 +1397,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
 
-file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
+file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot.png"
 capacity = 10000
