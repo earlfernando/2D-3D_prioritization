@@ -1400,7 +1400,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot"
+save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
 capacity = [3000,5000,7000,10000]
 for i in capacity:
     save_location_picture_local = save_location_picture+ str(capacity)+".png"
