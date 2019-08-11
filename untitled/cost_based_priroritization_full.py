@@ -929,12 +929,12 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                   selected_columns, image_array,save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
-    best_numbers = np.zeros(4)
+    best_numbers = np.zeros(3)
     time_track = np.zeros(3)
     list_cost = []
     ###parameter for pareto optimal
-    max_limit_pareto = np.amax(search_cost) * 0.1
-    scaling_factor =10
+    #max_limit_pareto = np.amax(search_cost) * 0.1
+    scaling_factor =2
     #scaling_factor_fptas = np.amax(search_cost)*0.5
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
@@ -943,6 +943,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
         if image.train_test == 0:
             number_of_test_images += 1
             print(number_of_test_images)
+            truth_actual = len(image.poistive_descriptor)
             # making data frame
             if len(image.poistive_descriptor)==0:
                 descriptors = image.negative_descriptor
@@ -967,27 +968,30 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             # combine for prioritization
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
             time_greedy_start = time.time()
-            _, _, greedy_N = greedy_mine(capacity=capacity, weight_cost=list_for_prioritization)
+            _, combination_greedy, _= greedy_mine(capacity=capacity, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
             print('greedy over')
             time_fptas_start = time.time()
             weights_fptas = [cost for cost in actual_cost]
             values_fptas = [prob for prob in result_forest[:, 0]]
-            picks = fptas(weights=weights_fptas,values=values_fptas,n_items=len(weights_fptas),capacity=capacity,scaling_factor=scaling_factor)
+            combination_fptas = fptas(weights=weights_fptas,values=values_fptas,n_items=len(weights_fptas),capacity=capacity,scaling_factor=scaling_factor)
             print('fptas')
             #_, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
             time_fptas_end = time.time()
             print(time_fptas_end-time_fptas_start)
-            fptas_N = len(picks)
+
             #print("fptas")
-            pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
-            pareto_optimal_N= pareto_optimal_solution[-1][2]
-            print('pareto over')
+            #pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
+            #pareto_optimal_N= pareto_optimal_solution[-1][2]
+            #print('pareto over')
             time_ranking_start = time.time()
-            average_N = average_ranking( list_prioritizatoin=list_for_prioritization, capacity=capacity)
+            combination_average = average_ranking( list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
+            truth_greedy = combinaton_check(truth_actual,combination_greedy)
+            truth_average = combinaton_check(truth_actual,combination_average)
+            truth_fptas = combinaton_check(truth_actual,combination_fptas)
             ### first greedy, then fptas then ranking, then pareto
-            best_numbers += np.array([greedy_N, average_N, pareto_optimal_N,fptas_N])
+            best_numbers += np.array([truth_greedy, truth_average, truth_fptas])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start])
             list_cost.append(np.copy(best_numbers))
@@ -1003,8 +1007,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     ####ranking
     plt.plot(list_cost[:, 1], y, label='ranking_average')
     ####pareto
-    plt.plot(list_cost[:, 2], y, label='pareto optimal')
-    plt.plot(list_cost[:, 3], y, label='FPTAS')
+    #plt.plot(list_cost[:, 2], y, label='pareto optimal')
+    plt.plot(list_cost[:, 2], y, label='FPTAS')
     plt.xlabel('Number of descriptors')
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\\,capacity={:10.2f},FPTAS time ={:10.2f}'.format(time_track[0], time_track[1],time_track[2],capacity))
@@ -1012,6 +1016,13 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.savefig(save_location_picture)
     plt.close()
     plt.show()
+
+
+def combinaton_check (positive_length , combination):
+    combination = np.array(combination)
+    truth_return = len(np.where(combination<=positive_length))
+    return  truth_return
+
 
 """
 def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
@@ -1283,6 +1294,7 @@ def average_ranking(list_prioritizatoin, capacity):
     ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
     ranked_array = []
 
+
     for i in range(len(list_prioritizatoin)):
         local_rank_cost = np.argwhere(ranking_cost[:, 0] == i)
         local_rank_prob = np.argwhere(ranking_prob[:, 0] == i)
@@ -1291,14 +1303,18 @@ def average_ranking(list_prioritizatoin, capacity):
     ranked_array = np.array(sorted(ranked_array, key=lambda x: x[1], reverse=False))
     return_rank = ranked_array[:, 0]
     local_capacity = 0
+    return_list =[]
     for number_of_matches, i in enumerate(return_rank):
         i = int(i)
         local_capacity += list_prioritizatoin[i][0]
+        return_list.append(i)
         if local_capacity > capacity:
             local_capacity -= list_prioritizatoin[i][0]
-            return number_of_matches+1
+            return_list = return_list[0:-1]
+            return return_list
 
-    return number_of_matches+1
+
+    return return_list
 
 
 def handle_data_for_test_image(positive, feature_length, csv_file_location_kmeans):
@@ -1383,7 +1399,7 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot.png"
-capacity = 20000
+capacity = 10000
 final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity, selected_columns,
               image_array,save_location_picture)
 """
