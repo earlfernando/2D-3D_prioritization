@@ -238,7 +238,7 @@ def handle_data(positive, negative, feature_length, csv_file_location):
     headers = create_headers(feature_length)
     headers.append('label')
     # positive = random.sample(positive, 10000)
-    # negative = random.sample(negative, 10000)
+    negative = random.sample(negative, len(negative))
     print(np.shape(positive)[0], np.shape(negative)[0])
 
     positive_label = np.ones((np.shape(positive)[0], 1))
