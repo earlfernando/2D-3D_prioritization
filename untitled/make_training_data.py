@@ -233,12 +233,16 @@ def create_headers(feature_length):
     return columns
 
 
-def handle_data(positive, negative, feature_length, csv_file_location):
+def handle_data(positive, negative, feature_length, csv_file_location,sampling_needed):
     print('data_handling')
     headers = create_headers(feature_length)
     headers.append('label')
     # positive = random.sample(positive, 10000)
-    negative = random.sample(negative, len(negative))
+    #negative = random.sample(negative, 10000)
+    if sampling_needed:
+        positive = np.vstack(positive,positive)
+        additonal_positive = random.sample(positive,10000)
+        positive = np.vstack(positive,additonal_positive)
     print(np.shape(positive)[0], np.shape(negative)[0])
 
     positive_label = np.ones((np.shape(positive)[0], 1))
@@ -1119,13 +1123,13 @@ print('task1 complete')
 positive, negative = make_training_data(cameras, image_array)
 print('task2 complete')
 headers = handle_data_small(positive, negative, feature_length, csv_file_location_small)
-
-headers = handle_data(positive, negative, feature_length, csv_file_location_400000)
+s
+headers = handle_data(positive, negative, feature_length, csv_file_location_400000,True)
 print('3')
 headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
 test_data_positve,test_data_negative = make_test_data(point3D_location_overall,database_locatiom,images_test_file_location)
-headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
+headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test,False)
 print('all the csv files are ready')
 
 #test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
