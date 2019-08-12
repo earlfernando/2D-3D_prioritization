@@ -928,8 +928,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                   selected_columns, image_array,save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
-    best_numbers = np.zeros(3)
-    time_track = np.zeros(3)
+    best_numbers = np.zeros(5)
+    time_track = np.zeros(5)
     list_cost = []
     ###parameter for pareto optimal
     #max_limit_pareto = np.amax(search_cost) * 0.1
@@ -986,14 +986,22 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_ranking_start = time.time()
             combination_average = average_ranking( list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
+            time_cost_start = time.time()
+            combination_cost = ranking_search_cost(list_prioritizatoin=list_for_prioritization,capacity=capacity)
+            time_cost= time.time()-time_cost_start
+            time_prob_start =time.time()
+            combination_prob   = ranking_probabilities(list_prioritizatoin=list_for_prioritization,capacity=capacity)
+            time_prob= time.time()-time_prob_start
+            truth_cost = combinaton_check(truth_actual,combination_cost)
+            truth_prob = combinaton_check(truth_actual,combination_prob)
             truth_greedy = combinaton_check(truth_actual,combination_greedy)
             truth_average = combinaton_check(truth_actual,combination_average)
             truth_fptas = combinaton_check(truth_actual,combination_fptas)
             ### first greedy, then fptas then ranking, then pareto
-            print(truth_fptas,truth_average,truth_greedy,truth_actual)
-            best_numbers += np.array([truth_greedy, truth_average, truth_fptas])
+            print(truth_fptas,truth_average,truth_greedy,truth_cost,truth_prob,truth_actual)
+            best_numbers += np.array([truth_greedy, truth_average, truth_fptas,truth_cost,truth_prob])
             time_track += np.array([time_greedy_end - time_greedy_start,
-                                    time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start])
+                                    time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start,time_cost,time_prob])
             list_cost.append(np.copy(best_numbers))
 
     ##plotting
@@ -1001,17 +1009,20 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
     list_cost = np.array(list_cost)
     print(np.size(list_cost),np.size(y),list_cost,y)
-    plt.figure()
+    plt.figure(figsize=(10,10))
     ###greedy
-    plt.plot(list_cost[:, 0], y, label='greedy')
+    plt.plot(list_cost[:, 0], y, label='Greedy')
     ####ranking
-    plt.plot(list_cost[:, 1], y, label='ranking_average')
+    plt.plot(list_cost[:, 1], y, label='Ranking average')
     ####pareto
     #plt.plot(list_cost[:, 2], y, label='pareto optimal')
     plt.plot(list_cost[:, 2], y, label='FPTAS')
+    plt.plot(list_cost[:,3],y,label='Search Cost')
+    plt.plot(list_cost[:,4],y,label='Prob Rank')
     plt.xlabel('Number of descriptors')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\\,capacity={:10.2f},FPTAS time ={:10.2f}'.format(time_track[0], time_track[1],time_track[2],capacity))
+    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\n,FPTAS={:10.2f},Capacity ={:10.2f}\n Search cost={:10.2f}, Prob_ranking ={10.2f}'.
+              format(time_track[0], time_track[1],time_track[2],capacity,time_track[3],time_track[4]))
     plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
@@ -1317,6 +1328,55 @@ def average_ranking(list_prioritizatoin, capacity):
     return return_list
 
 
+def ranking_search_cost(list_prioritizatoin, capacity):
+    # cost , prob
+    ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
+    #ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
+    ranking_cost = np.array(sorted(ranking_cost, key=lambda x: x[1], reverse=False))
+    #ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    ranked_array = []
+
+
+
+    return_rank = ranking_cost[:, 0]
+    local_capacity = 0
+    return_list =[]
+    for number_of_matches, i in enumerate(return_rank):
+        i = int(i)
+        local_capacity += list_prioritizatoin[i][0]
+        return_list.append(i)
+        if local_capacity > capacity:
+            local_capacity -= list_prioritizatoin[i][0]
+            return_list = return_list[0:-1]
+            return return_list
+    return return_list
+
+
+def ranking_probabilities(list_prioritizatoin, capacity):
+    # cost , prob
+    #ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
+    ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
+    #ranking_cost = np.array(sorted(ranking_cost, key=lambda x: x[1], reverse=False))
+    ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    ranked_array = []
+
+    return_rank = ranking_prob[:, 0]
+    local_capacity = 0
+    return_list = []
+    for number_of_matches, i in enumerate(return_rank):
+        i = int(i)
+        local_capacity += list_prioritizatoin[i][0]
+        return_list.append(i)
+        if local_capacity > capacity:
+            local_capacity -= list_prioritizatoin[i][0]
+            return_list = return_list[0:-1]
+            return return_list
+    return return_list
+
+
+
+
+
 def handle_data_for_test_image(positive, feature_length, csv_file_location_kmeans):
     print('data_handling')
     headers = create_headers(feature_length)
@@ -1406,7 +1466,7 @@ save_location_picture = "/home/earlfernando/kingscollege/capacity_plots_best_for
 #save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
 capacity = [3000,5000,7000,10000]
 for i in capacity:
-    save_location_picture_local = save_location_picture+ str(capacity)+".png"
+    save_location_picture_local = save_location_picture+ str(i)+".png"
     final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, i, selected_columns,
                   image_array,save_location_picture_local)
 
