@@ -241,7 +241,7 @@ def handle_data(positive, negative, feature_length, csv_file_location,sampling_n
     #negative = random.sample(negative, 10000)
     if sampling_needed:
         positive = np.vstack((positive,positive))
-        additonal_positive = random.sample(positive,10000)
+        additonal_positive = random.sample(list(positive),10000)
         positive = np.vstack((positive,additonal_positive))
     print(np.shape(positive)[0], np.shape(negative)[0])
 
