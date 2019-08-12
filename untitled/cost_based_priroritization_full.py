@@ -1021,8 +1021,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:,4],y,label='Prob Rank')
     plt.xlabel('Number of descriptors')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\n,FPTAS={:10.2f},Capacity ={:10.2f}\n Search cost={:10.2f}, Prob_ranking ={10.2f}'.
-              format(time_track[0], time_track[1],time_track[2],capacity,time_track[3],time_track[4]))
+    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}\n,FPTAS={:10.2f} Search cost={:10.2f} \n Prob_ranking ={10.2f},Capacity ={:10.2f}'.
+              format(time_track[0], time_track[1],time_track[2],time_track[3],time_track[4],capacity))
     plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
