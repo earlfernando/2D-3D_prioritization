@@ -240,9 +240,9 @@ def handle_data(positive, negative, feature_length, csv_file_location,sampling_n
     # positive = random.sample(positive, 10000)
     #negative = random.sample(negative, 10000)
     if sampling_needed:
-        positive = np.vstack(positive,positive)
+        positive = np.vstack((positive,positive))
         additonal_positive = random.sample(positive,10000)
-        positive = np.vstack(positive,additonal_positive)
+        positive = np.vstack((positive,additonal_positive))
     print(np.shape(positive)[0], np.shape(negative)[0])
 
     positive_label = np.ones((np.shape(positive)[0], 1))
@@ -1123,8 +1123,8 @@ print('task1 complete')
 positive, negative = make_training_data(cameras, image_array)
 print('task2 complete')
 headers = handle_data_small(positive, negative, feature_length, csv_file_location_small)
-s
-headers = handle_data(positive, negative, feature_length, csv_file_location_400000,True)
+
+headers = handle_data(positive, negative, feature_length, csv_file_location_400000,False)
 print('3')
 headers=handle_data_for_kmeans(positive,negative,feature_length,csv_file_location_kmeans)
 print('4')
