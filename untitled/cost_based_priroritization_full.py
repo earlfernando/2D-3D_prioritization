@@ -457,7 +457,7 @@ def k_means(headers, feature_length, csv_file_location, file_name, number_of_clu
 
 def k_means_broken_samples(headers, feature_length, csv_file_location_kmeans, file_name, number_of_clusters):
     chunk_size = 10 ** 4
-    kmeans = MiniBatchKMeans(n_clusters=number_of_clusters, batch_size=chunk_size, max_iter=100, random_state=42,
+    kmeans = MiniBatchKMeans(n_clusters=number_of_clusters, batch_size=chunk_size, max_iter=1000, random_state=42,
                              verbose=True)
     print("entering loop")
 
@@ -871,7 +871,7 @@ def fptas(values,weights,n_items,capacity,scaling_factor):
     new_capacity = int(float(capacity) / scaling_factor)
     new_weight_cost = [int(round(float(weight) / scaling_factor)  )for weight in weights]
 
-    return  knapsack_dp(values,new_weight_cost,n_items,new_capacity)
+    return  knapsack_dp(values,new_weight_cost,n_items,new_capacity,False)
 
 
 
@@ -962,8 +962,16 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             result_forest = forest_model.predict_proba(X)
             # make search cost
             actual_cost = []
-            for i in result_kmeans:
-                actual_cost.append(search_cost[int(i)])
+            no_point =[]
+            for k, i in enumerate(result_kmeans):
+                if search_cost[int(i)] ==0:
+                    no_point.append(k)
+                    if truth_actual >0:
+                        if truth_actual <k:
+                            truth_actual -=1
+                else:
+                    actual_cost.append(search_cost[int(i)])
+            result_forest = np.delete(result_forest, no_point)
             total_cost = np.sum(actual_cost)
             # combine for prioritization
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
