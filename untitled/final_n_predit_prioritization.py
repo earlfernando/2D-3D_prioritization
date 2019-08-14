@@ -962,8 +962,14 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             result_forest = forest_model.predict_proba(X)
             # make search cost
             actual_cost = []
-            for i in result_kmeans:
-                actual_cost.append(search_cost[int(i)])
+            for k, i in enumerate(result_kmeans):
+
+                if search_cost[int(i)] == 0:
+                    print("found")
+                    del result_forest[i]
+                else:
+
+                    actual_cost.append(search_cost[int(i)])
             total_cost = np.sum(actual_cost)
             # combine for prioritization
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
@@ -1002,11 +1008,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     save_location_picture_average = save_location_picture+ "N_average.png"
     plt.figure()
     ###greedy
-    plt.plot(list_cost[:, 0], y, label='greedy')
+    plt.plot(np.sort(list_cost[:, 0]), y, label='greedy')
     ####ranking
-    plt.plot(list_cost[:, 1], y, label='ranking_average')
+    plt.plot(np.sort(list_cost[:, 1]), y, label='ranking_average')
     ####pareto
-    plt.plot(list_cost[:, 2], y, label='pareto optimal')
+    plt.plot(np.sort(list_cost[:, 2]), y, label='pareto optimal')
     #plt.plot(list_cost[:, 3], y, label='FPTAS')
     plt.xlabel('Capacity')
     plt.ylabel('Percentage of test images')
@@ -1478,7 +1484,7 @@ file_name_random_forest = "/home/earlfernando/shopfacade/dataset_full/noFeature/
 
 save_location_picture = "/home/earlfernando/shopfacade/best_plot"
 #k_means(headers,feature_length,csv_file_location_kmeans,file_name_kmeans)
-k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+#k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 
 search_cost = search_cost_calculation(headers, feature_length, csv_file_location_kmeans, file_name_kmeans,
                                       number_of_clusters)

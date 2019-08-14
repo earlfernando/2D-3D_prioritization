@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import sqlite3
 import sys
 from read_model import read_images_binary, read_points3d_binary
@@ -37,7 +38,7 @@ database_locatiom = "/home/earlfernando/shopfacade/shopfacade.db"
 image_bin_location = "/home/earlfernando/shopfacade/images.bin"
 csv_file_location_400000 = "/home/earlfernando/shopfacade/training_Data_RandomForest_overall.csv"
 images_test_file_location = "/home/earlfernando/shopfacade/dataset_test.txt"
-#file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
+# file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 file_name_kmeans = "/home/earlfernando/shopfacade/test_model_kmeans.sav"
 feature_length = 128
 csv_file_location_kmeans = "/home/earlfernando/shopfacade/train_kmeans.csv"
@@ -45,9 +46,10 @@ number_of_clusters = 10000
 database_location_overall = "/home/earlfernando/shopfacade/marycollege.db"
 image_bin_location_overall = "/home/earlfernando/shopfacade/images.bin"
 point3D_location_overall = "/home/earlfernando/shopfacade/points3D.bin"
-#csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
+# csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
 csv_file_location_kmeans_test = "/home/earlfernando/shopfacade/test_kmeans_modified.csv"
 max_cost = 20000
+
 
 def blob_to_array(blob, dtype, shape=(-1,)):
     IS_PYTHON3 = sys.version_info[0] >= 3
@@ -121,7 +123,7 @@ class image:
                 self.negative_descriptor.append(descriptor)
 
 
-def add_feature_location(database_location,images_test_file_location):
+def add_feature_location(database_location, images_test_file_location):
     database = sqlite3.connect(database_location)
     cursor = database.cursor()
     test_images_id = []
@@ -487,7 +489,6 @@ def search_cost_calculation(headers, feature_length, csv_file_location_kmeans, f
 
 
 def test_images_string(images_test_file_location):
-
     test_images = []
     with open(images_test_file_location, 'r') as data:
         for line in data:
@@ -498,7 +499,7 @@ def test_images_string(images_test_file_location):
     return test_images
 
 
-def make_test_data(points3D_location, database_location,images_test_file_location):
+def make_test_data(points3D_location, database_location, images_test_file_location):
     points3D = read_points3d_binary(points3D_location)
     database = sqlite3.connect(database_location)
     cursor = database.cursor()
@@ -777,6 +778,8 @@ def add_descriptors_to_image_array(image_array, cameras):
 
         # image_array[cam - 1].add_negative()
     return image_array
+
+
 """def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
                   selected_columns, image_array, N):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
@@ -845,97 +848,100 @@ def add_descriptors_to_image_array(image_array, cameras):
     plt.title('Greedy time={},FPTAS time ={},Ranking_time={}'.format(time_track[0], time_track[1], time_track[2]))
     plt.legend
     plt.show()"""
-def ratio_test(headers,selected_colums,data_frame,k_means_model):
-        """
-        Applys lowes ratio test
-        :param headers: headers for descriptors
-        :param data_frame: a datafram of descriptors
-        :param k_means_model: k means model used for cluster
-        :return: modiefied X based on ratio test
-        """
-        X = data_frame[headers]
-        distances = k_means_model.transform(X)
-        sorted_array = np.sort(distances)
-        best_distance = sorted_array[:,-1]
-        second_best_distance = sorted_array[:,-2]
-        ratio_array = np.divide(second_best_distance,best_distance)
-        rows_to_be_deleted = np.where(ratio_array>0.7)[0]
-        print(len(rows_to_be_deleted))
-        new_data = data_frame.drop(rows_to_be_deleted,axis=0)
-        X = new_data[headers]
-        X_forest = new_data[selected_columns]
-        return X_forest,X
 
-def fptas(values,weights,n_items,capacity,scaling_factor):
-    #scaling_factor = (correctness* n_items)/max_cost
+
+def ratio_test(headers, selected_colums, data_frame, k_means_model):
+    """
+    Applys lowes ratio test
+    :param headers: headers for descriptors
+    :param data_frame: a datafram of descriptors
+    :param k_means_model: k means model used for cluster
+    :return: modiefied X based on ratio test
+    """
+    X = data_frame[headers]
+    distances = k_means_model.transform(X)
+    sorted_array = np.sort(distances)
+    best_distance = sorted_array[:, -1]
+    second_best_distance = sorted_array[:, -2]
+    ratio_array = np.divide(second_best_distance, best_distance)
+    rows_to_be_deleted = np.where(ratio_array > 0.7)[0]
+    print(len(rows_to_be_deleted))
+    new_data = data_frame.drop(rows_to_be_deleted, axis=0)
+    X = new_data[headers]
+    X_forest = new_data[selected_columns]
+    return X_forest, X
+
+
+def fptas(values, weights, n_items, capacity, scaling_factor):
+    # scaling_factor = (correctness* n_items)/max_cost
+    max_cost = max(weights)
     new_capacity = int(float(capacity) / scaling_factor)
-    new_weight_cost = [int(round(float(weight) / scaling_factor)  )for weight in weights]
+    new_weight_cost = [
+        int(round(float(weight) / scaling_factor)) if int(round(float(weight) / scaling_factor)) > 0 else int(max_cost)
+        for weight in weights]
 
-    return  knapsack_dp(values,new_weight_cost,n_items,new_capacity,False)
+    return knapsack_dp(values, new_weight_cost, n_items, new_capacity, False)
 
 
+def knapsack_dp(values, weights, n_items, capacity, return_all=False):
+    check_inputs(values, weights, n_items, capacity)
 
-def knapsack_dp(values,weights,n_items,capacity,return_all=False):
+    table = np.zeros((n_items + 1, capacity + 1), dtype=np.float32)
+    keep = np.zeros((n_items + 1, capacity + 1), dtype=np.float32)
 
-    check_inputs(values,weights,n_items,capacity)
-
-    table = np.zeros((n_items+1,capacity+1),dtype=np.float32)
-    keep = np.zeros((n_items+1,capacity+1),dtype=np.float32)
-
-    for i in range(1,n_items+1):
-        for w in range(0,capacity+1):
-            wi = weights[i-1] # weight of current item
-            vi = values[i-1] # value of current item
-            if (wi <= w) and (vi + table[i-1,w-wi] > table[i-1,w]):
-                table[i,w] = vi + table[i-1,w-wi]
-                keep[i,w] = 1
+    for i in range(1, n_items + 1):
+        for w in range(0, capacity + 1):
+            wi = weights[i - 1]  # weight of current item
+            vi = values[i - 1]  # value of current item
+            if (wi <= w) and (vi + table[i - 1, w - wi] > table[i - 1, w]):
+                table[i, w] = vi + table[i - 1, w - wi]
+                keep[i, w] = 1
             else:
-                table[i,w] = table[i-1,w]
+                table[i, w] = table[i - 1, w]
 
     picks = []
     K = capacity
 
-    for i in range(n_items,0,-1):
-        if keep[i,K] == 1:
+    for i in range(n_items, 0, -1):
+        if keep[i, K] == 1:
             picks.append(i)
-            K -= weights[i-1]
+            K -= weights[i - 1]
 
     picks.sort()
-    picks = [x-1 for x in picks] # change to 0-index
+    picks = [x - 1 for x in picks]  # change to 0-index
 
-   # if return_all:
-      #  max_val = table[n_items,capacity]
-       # return picks,max_val
+    # if return_all:
+    #  max_val = table[n_items,capacity]
+    # return picks,max_val
     return picks
 
 
-def check_inputs(values,weights,n_items,capacity):
+def check_inputs(values, weights, n_items, capacity):
     # check variable type
-    assert(isinstance(values,list))
-    assert(isinstance(weights,list))
-    assert(isinstance(n_items,int))
-    assert(isinstance(capacity,int))
+    assert (isinstance(values, list))
+    assert (isinstance(weights, list))
+    assert (isinstance(n_items, int))
+    assert (isinstance(capacity, int))
     # check value type
-    assert(all(isinstance(val,int) or isinstance(val,float) for val in values))
-    assert(all(isinstance(val,int) for val in weights))
+    assert (all(isinstance(val, int) or isinstance(val, float) for val in values))
+    assert (all(isinstance(val, int) for val in weights))
     # check validity of value
-    assert(all(val >= 0 for val in weights))
-    assert(n_items > 0)
-    assert(capacity > 0)
-
+    assert (all(val >= 0 for val in weights))
+    assert (n_items > 0)
+    assert (capacity > 0)
 
 
 def final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, capacity,
-                  selected_columns, image_array,save_location_picture):
+                  selected_columns, image_array, save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
     best_numbers = np.zeros(5)
     time_track = np.zeros(5)
     list_cost = []
     ###parameter for pareto optimal
-    #max_limit_pareto = np.amax(search_cost) * 0.1
-    scaling_factor =2
-    #scaling_factor_fptas = np.amax(search_cost)*0.5
+    # max_limit_pareto = np.amax(search_cost) * 0.1
+    scaling_factor = 2
+    # scaling_factor_fptas = np.amax(search_cost)*0.5
     ## creating loop of the image_Array
     headers = create_headers(feature_length)
     number_of_test_images = 0
@@ -945,15 +951,15 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             print(number_of_test_images)
             truth_actual = len(image.poistive_descriptor)
             # making data frame
-            if len(image.poistive_descriptor)==0:
+            if len(image.poistive_descriptor) == 0:
                 descriptors = image.negative_descriptor
-            else :
-                descriptors = np.vstack((image.poistive_descriptor,image.negative_descriptor))
+            else:
+                descriptors = np.vstack((image.poistive_descriptor, image.negative_descriptor))
             print(len(descriptors))
             image_Data_frame = pd.DataFrame(descriptors, columns=headers)
             ##data fram modification
-            #image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
-            #X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
+            # image_Data_frame = ratio_test(headers,image_Data_frame,kmeans_model)
+            # X,X_kmeans = ratio_test(headers,selected_columns,image_Data_frame,kmeans_model)
             X = image_Data_frame[selected_columns]
 
             X_kmeans = image_Data_frame[headers]
@@ -962,74 +968,82 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             result_forest = forest_model.predict_proba(X)
             # make search cost
             actual_cost = []
-            no_point =[]
+            no_point = []
             for k, i in enumerate(result_kmeans):
-                if search_cost[int(i)] ==0:
-                    no_point.append(k)
-                    if truth_actual >0:
-                        if truth_actual <k:
-                            truth_actual -=1
+
+                if search_cost[int(i)] == 0:
+                    print("found")
+                    del result_forest[i]
+                    if truth_actual > 0:
+                        if truth_actual < k:
+                            truth_actual -= 1
                 else:
+
                     actual_cost.append(search_cost[int(i)])
-            result_forest = np.delete(result_forest, no_point)
+
+            #print(len(actual_cost), len(result_forest), truth_actual, len(image.poistive_descriptor))
             total_cost = np.sum(actual_cost)
             # combine for prioritization
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
             time_greedy_start = time.time()
-            _, combination_greedy, _= greedy_mine(capacity=capacity, weight_cost=list_for_prioritization)
+            _, combination_greedy, _ = greedy_mine(capacity=capacity, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
             print('greedy over')
             time_fptas_start = time.time()
             weights_fptas = [cost for cost in actual_cost]
             values_fptas = [prob for prob in result_forest[:, 0]]
-            combination_fptas = fptas(weights=weights_fptas,values=values_fptas,n_items=len(weights_fptas),capacity=capacity,scaling_factor=scaling_factor)
+            combination_fptas = fptas(weights=weights_fptas, values=values_fptas, n_items=len(weights_fptas),
+                                      capacity=capacity, scaling_factor=scaling_factor)
             print('fptas')
-            #_, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
+            # _, fptas_N= FPTAS(len(result_forest), capacity=capacity, weight_cost=list_for_prioritization,scaling_factor=scaling_factor_fptas)
             time_fptas_end = time.time()
-            print(time_fptas_end-time_fptas_start)
+            print(time_fptas_end - time_fptas_start)
 
-            #print("fptas")
-            #pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
-            #pareto_optimal_N= pareto_optimal_solution[-1][2]
-            #print('pareto over')
+            # print("fptas")
+            # pareto_optimal_solution = pareto_optimal(result_forest[:, 0], actual_cost, capacity, max_limit_pareto)
+            # pareto_optimal_N= pareto_optimal_solution[-1][2]
+            # print('pareto over')
             time_ranking_start = time.time()
-            combination_average = average_ranking( list_prioritizatoin=list_for_prioritization, capacity=capacity)
+            combination_average = average_ranking(list_prioritizatoin=list_for_prioritization, capacity=capacity)
             time_ranking_end = time.time()
             time_cost_start = time.time()
-            combination_cost = ranking_search_cost(list_prioritizatoin=list_for_prioritization,capacity=capacity)
-            time_cost= time.time()-time_cost_start
-            time_prob_start =time.time()
-            combination_prob   = ranking_probabilities(list_prioritizatoin=list_for_prioritization,capacity=capacity)
-            time_prob= time.time()-time_prob_start
-            truth_cost = combinaton_check(truth_actual,combination_cost)
-            truth_prob = combinaton_check(truth_actual,combination_prob)
-            truth_greedy = combinaton_check(truth_actual,combination_greedy)
-            truth_average = combinaton_check(truth_actual,combination_average)
-            truth_fptas = combinaton_check(truth_actual,combination_fptas)
+            combination_cost = ranking_search_cost(list_prioritizatoin=list_for_prioritization, capacity=capacity)
+            time_cost = time.time() - time_cost_start
+            time_prob_start = time.time()
+            combination_prob = ranking_probabilities(list_prioritizatoin=list_for_prioritization, capacity=capacity)
+            time_prob = time.time() - time_prob_start
+            truth_cost = combinaton_check(truth_actual, combination_cost)
+            truth_prob = combinaton_check(truth_actual, combination_prob)
+            truth_greedy = combinaton_check(truth_actual, combination_greedy)
+            truth_average = combinaton_check(truth_actual, combination_average)
+            truth_fptas = combinaton_check(truth_actual, combination_fptas)
             ### first greedy, then fptas then ranking, then pareto
-            print(truth_fptas,truth_average,truth_greedy,truth_cost,truth_prob,truth_actual)
-            best_numbers = np.array([truth_greedy, truth_average, truth_fptas,truth_cost,truth_prob])
+            print(truth_fptas, truth_average, truth_greedy, truth_cost, truth_prob, truth_actual)
+            best_numbers = np.array([truth_greedy, truth_average, truth_fptas, truth_cost, truth_prob])
             time_track += np.array([time_greedy_end - time_greedy_start,
-                                    time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start,time_cost,time_prob])
+                                    time_ranking_end - time_ranking_start, time_fptas_end - time_fptas_start, time_cost,
+                                    time_prob])
             list_cost.append(np.copy(best_numbers))
 
     ##plotting
 
-    y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
+    y = np.arange(1, number_of_test_images + 1) / number_of_test_images
     list_cost = np.array(list_cost)
-    print(np.size(list_cost),np.size(y),list_cost,y)
-    labels = ['Greedy','Ranking Average', 'FPTAS','Search Cost','Prob Rank']
-    plt.figure(figsize=(10,10))
+    print(np.size(list_cost), np.size(y), list_cost, y)
+    labels = ['Greedy', 'Ranking Average', 'FPTAS', 'Search Cost', 'Prob Rank']
+    plt.figure(figsize=(10, 10))
     for number, label_local in enumerate(labels):
-        plot_mine(list_cost[:,number],label_local,y)
+        plot_mine(list_cost[:, number], label_local, y)
     plt.xlabel('Number of matches')
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={0},Ranking_time={1}\n,FPTAS={2},Capacity ={3}\n Search cost={4}, Prob_ranking ={5}'.
-              format(round(time_track[0],2), round(time_track[1],2),round(time_track[2],2),capacity,round(time_track[3],2),round(time_track[4],2)))
+              format(round(time_track[0], 2), round(time_track[1], 2), round(time_track[2], 2), capacity,
+                     round(time_track[3], 2), round(time_track[4], 2)))
     plt.legend()
     plt.savefig(save_location_picture)
     plt.close()
     plt.show()
+
 
 """    ###greedy
     plt.plot(list_cost[:, 0], y, label='Greedy')
@@ -1042,14 +1056,23 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.plot(list_cost[:,4],y,label='Prob Rank')"""
 
 
-def plot_mine(list_local,label_local,y):
-    values,_ = np.histogram(list_local,bins= 'auto')
-    values= np.cumsum(values)
-    plt.plot(values,y,label=label_local)
-def combinaton_check (positive_length , combination):
+def plot_mine(list_local, label_local, y):
+    y, x = np.histogram(list_local, bins="auto")
+    print(x)
+    print(y)
+    x1 = np.sort(list_local)
+    local_number = len(list_local)
+    y1 = np.array(range(local_number)) / float(local_number)
+    plt.plot(x1, y1, label=label_local)
+
+
+# _,bins,_ = plt.hist(list_local,bins='auto',density = True,histtype = 'step',cumulative = True,label = label_local)
+
+
+def combinaton_check(positive_length, combination):
     combination = np.array(combination)
-    truth_return = len(np.where(combination<=positive_length)[0])
-    return  truth_return
+    truth_return = len(np.where(combination <= positive_length)[0])
+    return truth_return
 
 
 """
@@ -1238,37 +1261,37 @@ def pareto_optimal(result_forest, actual_cost, capacity, limit):
     number_of_points = len(points)
 
     for i in range(number_of_points):
-            cost = points[i][1]
-            prob = points[i][0]
-            number = 1
-            if prob == 0.0 or cost >= limit:
+        cost = points[i][1]
+        prob = points[i][0]
+        number = 1
+        if prob == 0.0 or cost >= limit:
 
-                continue
-            else:
-                pareto_optimal_old = pareto_optimal_solution
-                pareto_optimal_dub = []
-                old_number = len(pareto_optimal_solution)
-                pareto_optimal_dub.append([prob, cost,number])
-                for k in range(old_number):
-                    if pareto_optimal_solution[k][1] <= capacity:
-                        old_prob = prob + pareto_optimal_solution[k][0]
-                        old_cost = cost + pareto_optimal_solution[k][1]
-                        temp_number = 1+ pareto_optimal_solution[k][2]
-                        pareto_optimal_dub.append([old_prob, old_cost,temp_number])
-                pareto_optimal_solution = []
-                sol_temp = pareto_optimal_dub + pareto_optimal_old
-                sol_temp = sorted(sol_temp, key=itemgetter(1))
-                last_index = 0
-                if len(sol_temp) >= 1:
-                    for i in range(1, len(sol_temp)):
-                        last_item = sol_temp[last_index]
-                        present_item = sol_temp[i]
-                        if last_item[0] < present_item[0]:
-                            if last_item[1] < present_item[1]:
-                                pareto_optimal_solution.append(last_item)
-                                last_index = i
-                if last_index < len(sol_temp):
-                    pareto_optimal_solution.append(sol_temp[last_index])
+            continue
+        else:
+            pareto_optimal_old = pareto_optimal_solution
+            pareto_optimal_dub = []
+            old_number = len(pareto_optimal_solution)
+            pareto_optimal_dub.append([prob, cost, number])
+            for k in range(old_number):
+                if pareto_optimal_solution[k][1] <= capacity:
+                    old_prob = prob + pareto_optimal_solution[k][0]
+                    old_cost = cost + pareto_optimal_solution[k][1]
+                    temp_number = 1 + pareto_optimal_solution[k][2]
+                    pareto_optimal_dub.append([old_prob, old_cost, temp_number])
+            pareto_optimal_solution = []
+            sol_temp = pareto_optimal_dub + pareto_optimal_old
+            sol_temp = sorted(sol_temp, key=itemgetter(1))
+            last_index = 0
+            if len(sol_temp) >= 1:
+                for i in range(1, len(sol_temp)):
+                    last_item = sol_temp[last_index]
+                    present_item = sol_temp[i]
+                    if last_item[0] < present_item[0]:
+                        if last_item[1] < present_item[1]:
+                            pareto_optimal_solution.append(last_item)
+                            last_index = i
+            if last_index < len(sol_temp):
+                pareto_optimal_solution.append(sol_temp[last_index])
     return pareto_optimal_solution
 
 
@@ -1309,7 +1332,7 @@ def greedy_mine(capacity, weight_cost):
             best_cost += weight_cost[index][0]
 
         else:
-               return best_cost, best_comb, best_value
+            return best_cost, best_comb, best_value
 
     return best_cost, best_comb, best_value
 
@@ -1322,7 +1345,6 @@ def average_ranking(list_prioritizatoin, capacity):
     ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
     ranked_array = []
 
-
     for i in range(len(list_prioritizatoin)):
         local_rank_cost = np.argwhere(ranking_cost[:, 0] == i)
         local_rank_prob = np.argwhere(ranking_prob[:, 0] == i)
@@ -1331,7 +1353,7 @@ def average_ranking(list_prioritizatoin, capacity):
     ranked_array = np.array(sorted(ranked_array, key=lambda x: x[1], reverse=False))
     return_rank = ranked_array[:, 0]
     local_capacity = 0
-    return_list =[]
+    return_list = []
     for number_of_matches, i in enumerate(return_rank):
         i = int(i)
         local_capacity += list_prioritizatoin[i][0]
@@ -1341,23 +1363,20 @@ def average_ranking(list_prioritizatoin, capacity):
             return_list = return_list[0:-1]
             return return_list
 
-
     return return_list
 
 
 def ranking_search_cost(list_prioritizatoin, capacity):
     # cost , prob
     ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
-    #ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
+    # ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
     ranking_cost = np.array(sorted(ranking_cost, key=lambda x: x[1], reverse=False))
-    #ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    # ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
     ranked_array = []
-
-
 
     return_rank = ranking_cost[:, 0]
     local_capacity = 0
-    return_list =[]
+    return_list = []
     for number_of_matches, i in enumerate(return_rank):
         i = int(i)
         local_capacity += list_prioritizatoin[i][0]
@@ -1371,9 +1390,9 @@ def ranking_search_cost(list_prioritizatoin, capacity):
 
 def ranking_probabilities(list_prioritizatoin, capacity):
     # cost , prob
-    #ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
+    # ranking_cost = [(index, item[0]) for index, item in enumerate(list_prioritizatoin)]
     ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
-    #ranking_cost = np.array(sorted(ranking_cost, key=lambda x: x[1], reverse=False))
+    # ranking_cost = np.array(sorted(ranking_cost, key=lambda x: x[1], reverse=False))
     ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
     ranked_array = []
 
@@ -1389,9 +1408,6 @@ def ranking_probabilities(list_prioritizatoin, capacity):
             return_list = return_list[0:-1]
             return return_list
     return return_list
-
-
-
 
 
 def handle_data_for_test_image(positive, feature_length, csv_file_location_kmeans):
@@ -1415,9 +1431,10 @@ def handle_data_for_test_image(positive, feature_length, csv_file_location_kmean
 
     return headers
 
+
 cameras = read_images_binary(image_bin_location)
 # image_array = get_details_from_database()
-image_array = add_feature_location(database_locatiom,images_test_file_location)
+image_array = add_feature_location(database_locatiom, images_test_file_location)
 
 print('task1 complete')
 positive, negative = make_training_data(cameras, image_array)
@@ -1431,19 +1448,19 @@ test_data_positve,test_data_negative = make_test_data(point3D_location_overall,d
 headers = handle_data(test_data_positve,test_data_negative,feature_length,csv_file_location_kmeans_test)
 print('all the csv files are ready')"""
 
-#test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
+# test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
 # headers = handle_data_for_test_image(test_data,feature_length=feature_length,csv_file_location_kmeans=csv_file_test_image)
 
 ###remove ttis
-#headers = create_headers(feature_length)
-#headers.append('label')
+# headers = create_headers(feature_length)
+# headers.append('label')
 
 # clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
 # k_means(headers,feature_length,csv_file_location,file_name)
 # selected_columns = ['1', '2', '3' ,'4' ,'5' ,'7' ,'8' ,'12' ,'15' ,'16' ,'19' ,'20' ,'21' ,'24', '28', '38', '49', '66' ,'81', '95']
 print("kmeans")
 print("random forest saved")
-#k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
+# k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 # search_cost = search_cost_calculation(headers, feature_length, csv_file_location_kmeans, file_name_kmeans, number_of_clusters)
 
 # print(search_cost)
@@ -1458,7 +1475,7 @@ headers.append('label')
 ###
 # clf,selected_columns=random_forest_chunks(headers,feature_length,csv_file_location_400000,file_name_random_forest )
 # k_means(headers,feature_length,csv_file_location,file_name)
-#selected_columns = ['1', '2', '3', '4', '5', '7', '8', '12', '15', '16', '19', '20', '21', '24', '28', '38', '49', '66',
+# selected_columns = ['1', '2', '3', '4', '5', '7', '8', '12', '15', '16', '19', '20', '21', '24', '28', '38', '49', '66',
 #                    '81', '95']
 selected_columns = create_headers(feature_length)
 print("kmeans")
@@ -1473,23 +1490,20 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 # prediction_forest(headers,feature_length,csv_file_location_kmeans_test,file_name_random_forest,clf,file_name= file_name_random_forest,selected_col=selected_columns)
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
-#csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
+# csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
 file_name_kmeans = "/home/earlfernando/shopfacade/test_model_kmeans.sav"
 file_name_random_forest = "/home/earlfernando/shopfacade/dataset_full/noFeature/N=50max_depth=1000min_leaf=1.sav"
 
 save_location_picture = "/home/earlfernando/shopfacade/capacity_plots_best_forest"
-#file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
-#file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-#save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
-#capacity = [100,1000,5000,10000]
-capacity =[3]
+# file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
+# file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+# save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
+capacity = [100,1000,5000,10000]
+#capacity = [3]
 for i in capacity:
-    save_location_picture_local = save_location_picture+ str(i)+".png"
+    save_location_picture_local = save_location_picture + str(i) + ".png"
     final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, i, selected_columns,
-                  image_array,save_location_picture_local)
-
-
-
+                  image_array, save_location_picture_local)
 
 """Detail strings
 
@@ -1729,7 +1743,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     print(feature_header)
 
     return slf,feature_header"""
-
 
 
 
