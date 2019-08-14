@@ -32,20 +32,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(150000000)
-database_locatiom = "/home/earlfernando/marycollege/marycollege.db"
-image_bin_location = "/home/earlfernando/marycollege/images.bin"
-csv_file_location_400000 = "/home/earlfernando/marycollege/training_Data_RandomForest_overall.csv"
-images_test_file_location = "/home/earlfernando/marycollege/dataset_test.txt"
+database_locatiom = "/home/earlfernando/shopfacade/shopfacade.db"
+image_bin_location = "/home/earlfernando/shopfacade/images.bin"
+csv_file_location_400000 = "/home/earlfernando/shopfacade/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/shopfacade/dataset_test.txt"
 #file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earlfernando/marycollege/test_model_kmeans.sav"
+file_name_kmeans = "/home/earlfernando/shopfacade/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earlfernando/marycollege/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/shopfacade/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earlfernando/marycollege/marycollege.db"
-image_bin_location_overall = "/home/earlfernando/marycollege/images.bin"
-point3D_location_overall = "/home/earlfernando/marycollege/points3D.bin"
+database_location_overall = "/home/earlfernando/shopfacade/marycollege.db"
+image_bin_location_overall = "/home/earlfernando/shopfacade/images.bin"
+point3D_location_overall = "/home/earlfernando/shopfacade/points3D.bin"
 #csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
-csv_file_location_kmeans_test = "/home/earlfernando/marycollege/test_kmeans_modified.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/shopfacade/test_kmeans_modified.csv"
 max_cost = 20000
 
 def blob_to_array(blob, dtype, shape=(-1,)):
@@ -335,7 +335,7 @@ def random_forest(headers, feature_length, csv_file_location, file_name):
 
 
 def feature_selection(number):
-    csv_file_location_local = "/home/earlfernando/marycollege/training_Data_RandomForest_10000.csv"
+    csv_file_location_local = "/home/earlfernando/shopfacade/training_Data_RandomForest_10000.csv"
     if number == 0:
         selected_columns = create_headers(feature_length)
     if number >= 1:
@@ -1457,10 +1457,10 @@ search_cost = search_cost_calculation(headers, feature_length, csv_file_location
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
 #csv_file_location_kmeans = "/home/earlfernando/oldHospital/train_kmeans.csv"
-file_name_kmeans = "/home/earlfernando/marycollege/test_model_kmeans.sav"
-file_name_random_forest = "/home/earlfernando/marycollege/dataset_full/noFeature/N=100max_depth=300min_leaf=3.sav"
+file_name_kmeans = "/home/earlfernando/shopfacade/test_model_kmeans.sav"
+file_name_random_forest = "/home/earlfernando/shopfacade/dataset_full/noFeature/N=50max_depth=1000min_leaf=1.sav"
 
-save_location_picture = "/home/earlfernando/marycollege/capacity_plots_best_forest"
+save_location_picture = "/home/earlfernando/shopfacade/capacity_plots_best_forest"
 #file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 #file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 #save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
