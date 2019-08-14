@@ -17,6 +17,7 @@ import time
 from sklearn.utils import shuffle
 from sklearn.tree import export_graphviz
 from sklearn.externals.six import StringIO
+from scipy import stats
 from IPython.display import Image
 import matplotlib.image as mpimg
 from subprocess import call
@@ -999,7 +1000,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             truth_fptas = combinaton_check(truth_actual,combination_fptas)
             ### first greedy, then fptas then ranking, then pareto
             print(truth_fptas,truth_average,truth_greedy,truth_cost,truth_prob,truth_actual)
-            best_numbers += np.array([truth_greedy, truth_average, truth_fptas,truth_cost,truth_prob])
+            best_numbers = np.array([truth_greedy, truth_average, truth_fptas,truth_cost,truth_prob])
             time_track += np.array([time_greedy_end - time_greedy_start,
                                     time_ranking_end - time_ranking_start,time_fptas_end-time_fptas_start,time_cost,time_prob])
             list_cost.append(np.copy(best_numbers))
@@ -1009,17 +1010,11 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     y = np.arange(1, number_of_test_images+1 ) / number_of_test_images
     list_cost = np.array(list_cost)
     print(np.size(list_cost),np.size(y),list_cost,y)
+    labels = ['Greedy','Ranking Average', 'FPTAS','Search Cost','Prob Rank']
     plt.figure(figsize=(10,10))
-    ###greedy
-    plt.plot(list_cost[:, 0], y, label='Greedy')
-    ####ranking
-    plt.plot(list_cost[:, 1], y, label='Ranking average')
-    ####pareto
-    #plt.plot(list_cost[:, 2], y, label='pareto optimal')
-    plt.plot(list_cost[:, 2], y, label='FPTAS')
-    plt.plot(list_cost[:,3],y,label='Search Cost')
-    plt.plot(list_cost[:,4],y,label='Prob Rank')
-    plt.xlabel('Number of descriptors')
+    for number, label_local in enumerate(labels):
+        plot_mine(list_cost[:,number],label_local,y)
+    plt.xlabel('Number of matches')
     plt.ylabel('Percentage of test images')
     plt.title('Greedy time={0},Ranking_time={1}\n,FPTAS={2},Capacity ={3}\n Search cost={4}, Prob_ranking ={5}'.
               format(round(time_track[0],2), round(time_track[1],2),round(time_track[2],2),capacity,round(time_track[3],2),round(time_track[4],2)))
@@ -1028,7 +1023,21 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     plt.close()
     plt.show()
 
+"""    ###greedy
+    plt.plot(list_cost[:, 0], y, label='Greedy')
+    ####ranking
+    plt.plot(list_cost[:, 1], y, label='Ranking average')
+    ####pareto
+    #plt.plot(list_cost[:, 2], y, label='pareto optimal')
+    plt.plot(list_cost[:, 2], y, label='FPTAS')
+    plt.plot(list_cost[:,3],y,label='Search Cost')
+    plt.plot(list_cost[:,4],y,label='Prob Rank')"""
 
+
+def plot_mine(list_local,label_local,y):
+    values,_ = np.histogram(list_local,bins= 'auto')
+    values= np.cumsum(values)
+    plt.plot(values,y,label=label_local)
 def combinaton_check (positive_length , combination):
     combination = np.array(combination)
     truth_return = len(np.where(combination<=positive_length)[0])
@@ -1464,7 +1473,8 @@ save_location_picture = "/home/earlfernando/shopfacade/capacity_plots_best_fores
 #file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 #file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 #save_location_picture = "/home/earlfernando/greatCourtTrinity/capacity_best_forest_plots"
-capacity = [100,1000,5000,10000]
+#capacity = [100,1000,5000,10000]
+capacity =[3]
 for i in capacity:
     save_location_picture_local = save_location_picture+ str(i)+".png"
     final_predict(feature_length, file_name_random_forest, file_name_kmeans, search_cost, i, selected_columns,
