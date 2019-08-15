@@ -1482,7 +1482,7 @@ selected_columns = create_headers(feature_length)
 #csv_file_location_kmeans = "/home/earlfernando/marycollege/train_kmeans.csv"
 
 
-file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
+file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
 file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot"
 # k_means(headers,feature_length,csv_file_location_kmeans,file_name_kmeans)
