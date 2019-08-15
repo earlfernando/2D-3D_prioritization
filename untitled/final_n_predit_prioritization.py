@@ -33,20 +33,20 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(150000000)
 # csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-database_locatiom = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
-image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
-csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
-images_test_file_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/dataset_test.txt"
+database_locatiom = "/home/earlfernando/marycollege/marycollege.db"
+image_bin_location = "/home/earlfernando/marycollege/images.bin"
+csv_file_location_400000 = "/home/earlfernando/marycollege/training_Data_RandomForest_overall.csv"
+images_test_file_location = "/home/earlfernando/marycollege/dataset_test.txt"
 # file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
-file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+file_name_kmeans = "/home/earlfernando/marycollege/test_model_kmeans.sav"
 feature_length = 128
-csv_file_location_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/marycollege/train_kmeans.csv"
 number_of_clusters = 10000
-database_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/greatCourt_database.db"
-image_bin_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
-point3D_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/points3D.bin"
-csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
-#csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_kmeans_modified.csv"
+database_location_overall = "/home/earlfernando/marycollege/marycollege.db"
+image_bin_location_overall = "/home/earlfernando/marycollege/images.bin"
+point3D_location_overall = "/home/earlfernando/marycollege/points3D.bin"
+# csv_file_location_kmeans_test = "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/marycollege/test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -337,7 +337,7 @@ def random_forest(headers, feature_length, csv_file_location, file_name):
 
 
 def feature_selection(number):
-    csv_file_location_local = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_10000.csv"
+    csv_file_location_local = "/home/earl/Thesis/marycollege/training_Data_RandomForest_10000.csv"
     if number == 0:
         selected_columns = create_headers(feature_length)
     if number >= 1:
@@ -963,15 +963,17 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             result_forest = forest_model.predict_proba(X)
             # make search cost
             actual_cost = []
+	    result_forest = list(result_forest)
             for k, i in enumerate(result_kmeans):
 
                 if search_cost[int(i)] == 0:
                     print("found")
-                    del result_forest[i]
+                    del result_forest[k]
                 else:
 
                     actual_cost.append(search_cost[int(i)])
-            total_cost = np.sum(actual_cost)
+            result_forest= np.array(result_forest)
+	    total_cost = np.sum(actual_cost)
             # combine for prioritization
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
             time_greedy_start = time.time()
@@ -1479,12 +1481,11 @@ print("kmeans")
 print("random forest saved")
 
 selected_columns = create_headers(feature_length)
-#csv_file_location_kmeans = "/home/earlfernando/marycollege/train_kmeans.csv"
+csv_file_location_kmeans = "/home/earlfernando/marycollege/train_kmeans.csv"
+file_name_kmeans = "/home/earlfernando/marycollege/test_model_kmeans.sav"
+file_name_random_forest = "/home/earlfernando/marycollege/dataset_full/noFeature/N=100max_depth=300min_leaf=1.sav"
 
-
-file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_full/noFeature/N=100max_depth=1000min_leaf=10.sav"
-file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
-save_location_picture = "/home/earlfernando/greatCourtTrinity/best_plot"
+save_location_picture = "/home/earlfernando/marycollege/best_plot"
 # k_means(headers,feature_length,csv_file_location_kmeans,file_name_kmeans)
 # k_means_broken_samples(headers,feature_length,csv_file_location_kmeans,file_name_kmeans,number_of_clusters)
 
@@ -1509,8 +1510,8 @@ for i in N_overall:
 """"File locations 
 
  Great court 
-file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
-file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
+ #file_name_random_forest = "/home/earlfernando/greatCourtTrinity/dataset_20000/correlation+pvalue/N=100max_depth=10min_leaf=1.sav"
+#file_name_kmeans = "/home/earlfernando/greatCourtTrinity/GreatCourt/test_model_kmeans.sav"
 
 
 Old Hospital
