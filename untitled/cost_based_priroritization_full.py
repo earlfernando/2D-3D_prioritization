@@ -877,7 +877,7 @@ def fptas(values, weights, n_items, capacity, scaling_factor):
     max_cost = max(weights)
     new_capacity = int(float(capacity) / scaling_factor)
     new_weight_cost = [
-        int(round(float(weight) / scaling_factor)) if int(round(float(weight) / scaling_factor)) > 0 else int(max_cost)
+        int(round(float(weight) / scaling_factor)) if int(round(float(weight) / scaling_factor)) > 0 else int(1)
         for weight in weights]
 
     return knapsack_dp(values, new_weight_cost, n_items, new_capacity, False)
@@ -1743,7 +1743,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     print(feature_header)
 
     return slf,feature_header"""
-
 
 
 
