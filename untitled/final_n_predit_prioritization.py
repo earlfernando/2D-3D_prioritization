@@ -972,9 +972,10 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                 else:
 
                     actual_cost.append(search_cost[int(i)])
-            result_forest = np.array(result_forest)
+
 	        total_cost = np.sum(actual_cost)
             # combine for prioritization
+            result_forest = np.array(result_forest)
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
             time_greedy_start = time.time()
             solution_greedy = greedy_mine(N=N, weight_cost=list_for_prioritization)
