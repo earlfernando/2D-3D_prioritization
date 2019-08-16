@@ -34,10 +34,10 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 # csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-save_location_overall = "/home/earlfernando/marycollege/dataset_full/"
+save_location_overall = "/home/earlfernando/shopfacade/dataset_full/"
 
 # database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location = "/home/earlfernando/marycollege/images.bin"
+image_bin_location = "/home/earlfernando/shopfacade/images.bin"
 csv_file_location_400000 = "/home/earlfernando/marycollege/training_Data_RandomForest_overall.csv"
 # file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 # file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
@@ -45,10 +45,10 @@ feature_length = 128
 # csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
 # database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location_overall = "/home/earlfernando/marycollege/images.bin"
+image_bin_location_overall = "/home/earlfernando/shopfacade/images.bin"
 # point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-location_small_dataset = "/home/earlfernando/marycollege/train_forest_small.csv"
-csv_file_location_kmeans_test = "/home/earlfernando/marycollege/test_kmeans_modified.csv"
+location_small_dataset = "/home/earlfernando/shopfacade/train_forest_small.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/shopfacade/test_kmeans_modified.csv"
 # "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
 max_cost = 20000
 
@@ -812,22 +812,25 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
                 classified=1
             elif classified ==1:
                 classified=0"""
-            positive = 1  # 0
-            negative = 0  # 1
+            positive = 0  # 0
+            negative = 1  # 1
             prob_positive = prob[positive]
-            prob_negative = prob[negative]
+            # prob_negative = prob[negative]
             positve_index = int(round(prob_positive / 10))
-            negative_index = int(round(prob_negative / 10))
+            # negative_index = int(round(prob_negative / 10))
             ######
-            local_prob_negative[negative_index] += 1
+            # local_prob_negative[negative_index] += 1
             local_prob_positive[positve_index] += 1
             if truth == positive:
                 local_positive[positve_index] += 1
-                model_accuracy += 1
+
             if truth == negative:
-                local_negative[negative_index] += 1
-            #####
-            #####
+                local_negative[positve_index] += 1
+            if truth == classified:
+                model_accuracy += 1
+        print(model_accuracy / total)
+        #####
+        #####
 
     # print(prob/10,'positive',classified,truth,np.argmax(prob))
     # print(prob/10,'negative',classified,truth,np.argmax(prob))
@@ -840,23 +843,24 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         else:
             accuracy_positve.append(0)
         if local_negative[i] > 0:
-            accuracy_negative.append(local_negative[i] / local_prob_negative[i])
+            accuracy_negative.append(local_negative[i] / local_prob_positive[i])
         else:
             accuracy_negative.append(0)
     x_axis = np.arange(number_axis)
     x_axis = x_axis / 10
 
-    fig, ax = plt.subplots()
-    line = ax.plot(x_axis, accuracy_positve, label='positve')
-    line2 = ax.plot(x_axis, accuracy_negative, label='negative')
-    ax.legend()
+    #fig, ax = plt.subplots()
+    plt.figure(figsize=(10,10))
+    plt.plot(x_axis, accuracy_positve, label='positive')
+    plt.plot(x_axis, accuracy_negative, label='negative')
+    plt.legend()
     plt.xlabel('probability from random forest')
     plt.ylabel('percentage of matches')
     plt.title(
         'Random_forest n_estimator ={}, max_features = {},\n max_depth = {}, min_leaf_node ={},\n accuracy={:10.2f},prediction time={:10.2f}'.format(
             n, len(selected_col), max_dept, min, model_accuracy / total, overall_itime))
     plt.savefig(save_location_picture)
-    plt.close(fig)
+    plt.close()
     return model_accuracy / total, overall_itime
 
 
@@ -1015,15 +1019,16 @@ print('all the csv files are ready')
 
 ###remove this
 headers = create_headers(feature_length)
+selected_columns = create_headers(feature_length)
 headers.append('label')
-N = [100]
-max_depth = [300]
+N = [50]
+max_depth = [1000]
 min_leaf_nodes = [1]
 # N =[1000]
 # max_depth = [10]
 # min_leaf_nodes =[1]
 accuracy_list = [['N', 'max_depth', 'min_samples_leaf', 'accuracy', 'time']]
-for feature in range(2):
+for feature in range(1):
     name = feature_selection(feature)
     save_location = save_location_overall + name
     for n in N:
@@ -1035,12 +1040,11 @@ for feature in range(2):
                     min)
                 save_location_forest = save_location_local + '.sav'
                 save_location_picture = save_location_local + '.png'
-                clf, selected_columns = random_forest_chunks(headers, feature_length, csv_file_location_400000,
-                                                             save_location_forest, n, max_dept, min,
-                                                             save_location_forest, feature_mode=feature,
-                                                             location_small_dataset=location_small_dataset)
-                # clf = pickle.load(open(file_name_random_forest, 'rb'))
-
+                # clf, selected_columns = random_forest_chunks(headers, feature_length, csv_file_location_400000,
+                #                                             save_location_forest, n, max_dept, min,
+                #                                             save_location_forest, feature_mode=feature,
+                #                                             location_small_dataset=location_small_dataset)
+                clf = pickle.load(open(save_location_forest, 'rb'))
                 accuracy, local_time = prediction_forest(headers, feature_length, csv_file_location_kmeans_test,
                                                          save_location_forest, clf,
                                                          file_name=save_location_forest, selected_col=selected_columns,
@@ -1049,10 +1053,10 @@ for feature in range(2):
                 accuracy_list.append([str(n), str(max_dept), str(min), str(accuracy), str(local_time)])
 
 save_location_csv = save_location_overall + 'final_result.csv'
-with open(save_location_csv, 'w') as csvFile:
-    writer = csv.writer(csvFile)
-    writer.writerows(accuracy_list)
-csvFile.close()
+#with open(save_location_csv, 'w') as csvFile:
+ #   writer = csv.writer(csvFile)
+ #   writer.writerows(accuracy_list)
+#csvFile.close()
 
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
@@ -1282,7 +1286,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     print(feature_header)
 
     return slf,feature_header"""
-
 
 
 
