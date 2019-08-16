@@ -963,7 +963,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             result_forest = forest_model.predict_proba(X)
             # make search cost
             actual_cost = []
-	    result_forest = list(result_forest)
+            result_forest = list(result_forest)
             for k, i in enumerate(result_kmeans):
 
                 if search_cost[int(i)] == 0:
@@ -972,8 +972,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                 else:
 
                     actual_cost.append(search_cost[int(i)])
-            result_forest= np.array(result_forest)
-	    total_cost = np.sum(actual_cost)
+            result_forest = np.array(result_forest)
+	        total_cost = np.sum(actual_cost)
             # combine for prioritization
             list_for_prioritization = [(cost, prob) for prob, cost in zip(result_forest[:, 0], actual_cost)]
             time_greedy_start = time.time()
