@@ -34,21 +34,21 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 # csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-save_location_overall = "/home/earlfernando/marycollege/dataset_full/"
+save_location_overall = "/home/earlfernando/kingscollege/dataset_full/"
 
 # database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location = "/home/earlfernando/marycollege/images.bin"
-csv_file_location_400000 = "/home/earlfernando/marycollege/training_Data_RandomForest_overall.csv"
+image_bin_location = "/home/earlfernando/kingscollege/images.bin"
+csv_file_location_400000 = "/home/earlfernando/kingsollege/training_Data_RandomForest_overall.csv"
 # file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 # file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
 # csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
 # database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location_overall = "/home/earlfernando/marycollege/images.bin"
+image_bin_location_overall = "/home/earlfernando/kingscollege/images.bin"
 # point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-location_small_dataset = "/home/earlfernando/marycollege/train_forest_small.csv"
-csv_file_location_kmeans_test = "/home/earlfernando/marycollege/test_kmeans_modified.csv"
+location_small_dataset = "/home/earlfernando/kingscollege/train_forest_small.csv"
+csv_file_location_kmeans_test = "/home/earlfernando/kingscollege/test_kmeans_modified.csv"
 # "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
 max_cost = 20000
 
@@ -1022,8 +1022,8 @@ headers = create_headers(feature_length)
 selected_columns = create_headers(feature_length)
 headers.append('label')
 N = [100]
-max_depth = [300]
-min_leaf_nodes = [1]
+max_depth = [4000]
+min_leaf_nodes = [10]
 # N =[1000]
 # max_depth = [10]
 # min_leaf_nodes =[1]
