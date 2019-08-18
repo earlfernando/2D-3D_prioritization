@@ -817,7 +817,7 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
             elif classified ==1:
                 classified=0"""
             positive = 1  # 0
-            negative = 0  # 1
+            negative = 0 # 1
             prob_positive = prob[positive]
             # prob_negative = prob[negative]
             positve_index = int(round(prob_positive / 10))
