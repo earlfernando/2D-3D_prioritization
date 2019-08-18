@@ -34,22 +34,22 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 warnings.filterwarnings("ignore")
 sys.setrecursionlimit(15000)
 # csv_file_test_image = "/home/earl/Thesis/GreatCourt/test_image.csv"
-save_location_overall = "/home/earlfernando/shopfacade/dataset_full/"
+save_location_overall = "/home/earlfernando/greatCourtTrinity/dataset_full/"
 
 # database_locatiom = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location = "/home/earlfernando/shopfacade/images.bin"
-csv_file_location_400000 = "/home/earlfernando/marycollege/training_Data_RandomForest_overall.csv"
+image_bin_location = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
+csv_file_location_400000 = "/home/earlfernando/greatCourtTrinity/GreatCourt/training_Data_RandomForest_overall.csv"
 # file_name_random_forest = "/home/earl/Thesis/GreatCourt/test_model_random_forest_10000.sav"
 # file_name_kmeans = "/home/earl/Thesis/GreatCourt/test_model_kmeans.sav"
 feature_length = 128
 # csv_file_location_kmeans = "/home/earl/Thesis/GreatCourt/train_kmeans.csv"
 number_of_clusters = 10000
 # database_location_overall = "/home/earl/Thesis/GreatCourt/greatCourt_database.db"
-image_bin_location_overall = "/home/earlfernando/shopfacade/images.bin"
+image_bin_location_overall = "/home/earlfernando/greatCourtTrinity/GreatCourt/images.bin"
 # point3D_location_overall = "/home/earl/Thesis/GreatCourt/points3D.bin"
-location_small_dataset = "/home/earlfernando/shopfacade/train_forest_small.csv"
-csv_file_location_kmeans_test = "/home/earlfernando/shopfacade/test_kmeans_modified.csv"
-# "/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
+location_small_dataset = "/home/earlfernando/greatCourtTrinity/GreatCourt/train_forest_small.csv"
+#csv_file_location_kmeans_test = "/home/earlfernando/shopfacade/test_kmeans_modified.csv"
+csv_file_location_kmeans_test ="/home/earlfernando/greatCourtTrinity/GreatCourt//test_kmeans_modified.csv"
 max_cost = 20000
 
 
@@ -772,7 +772,11 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
     chunk_accuracy = 0
     chunk_total = 0
     sum = 0
-    #####
+    ####
+    #
+    test_positive = np.zeros(number_axis)
+    test_negative = np.zeros(number_axis)
+
     local_positive = np.zeros(number_axis)
     local_negative = np.zeros(number_axis)
     local_prob_positive = np.zeros(number_axis)
@@ -812,8 +816,8 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
                 classified=1
             elif classified ==1:
                 classified=0"""
-            positive = 0  # 0
-            negative = 1  # 1
+            positive = 1  # 0
+            negative = 0  # 1
             prob_positive = prob[positive]
             # prob_negative = prob[negative]
             positve_index = int(round(prob_positive / 10))
@@ -828,6 +832,13 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
                 local_negative[positve_index] += 1
             if truth == classified:
                 model_accuracy += 1
+
+        # if classified == positive:
+        #    if truth == positive:
+        #       test_positive[positve_index] +=1
+        #  else:
+        #     test_negative[positve_index]+=1
+
         print(model_accuracy / total)
         #####
         #####
@@ -846,11 +857,12 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
             accuracy_negative.append(local_negative[i] / local_prob_positive[i])
         else:
             accuracy_negative.append(0)
+
     x_axis = np.arange(number_axis)
     x_axis = x_axis / 10
 
-    #fig, ax = plt.subplots()
-    plt.figure(figsize=(10,10))
+    # fig, ax = plt.subplots()
+    plt.figure(figsize=(10, 10))
     plt.plot(x_axis, accuracy_positve, label='positive')
     plt.plot(x_axis, accuracy_negative, label='negative')
     plt.legend()
@@ -860,7 +872,15 @@ def prediction_forest(headers, feature_length, csv_file_location_test, file_name
         'Random_forest n_estimator ={}, max_features = {},\n max_depth = {}, min_leaf_node ={},\n accuracy={:10.2f},prediction time={:10.2f}'.format(
             n, len(selected_col), max_dept, min, model_accuracy / total, overall_itime))
     plt.savefig(save_location_picture)
+
     plt.close()
+    # plt.figure(figsize=(10,10))
+    # index = np.arange(len(x_axis))
+
+    # plt.bar(index,test_negative)
+    # plt.xticks(index,x_axis,fontsize=5,rotation=30)
+    # plt.savefig(save_location_picture+'positive.png')
+
     return model_accuracy / total, overall_itime
 
 
@@ -1017,13 +1037,14 @@ print('all the csv files are ready')
 # test_data = get_image_descriptors(image_array=image_array,cameras=cameras)
 # headers = handle_data_for_test_image(test_data,feature_length=feature_length,csv_file_location_kmeans=csv_file_test_image)
 
+
 ###remove this
 headers = create_headers(feature_length)
 selected_columns = create_headers(feature_length)
 headers.append('label')
-N = [50]
+N = [100]
 max_depth = [1000]
-min_leaf_nodes = [1]
+min_leaf_nodes = [10]
 # N =[1000]
 # max_depth = [10]
 # min_leaf_nodes =[1]
@@ -1053,10 +1074,10 @@ for feature in range(1):
                 accuracy_list.append([str(n), str(max_dept), str(min), str(accuracy), str(local_time)])
 
 save_location_csv = save_location_overall + 'final_result.csv'
-#with open(save_location_csv, 'w') as csvFile:
- #   writer = csv.writer(csvFile)
- #   writer.writerows(accuracy_list)
-#csvFile.close()
+# with open(save_location_csv, 'w') as csvFile:
+#   writer = csv.writer(csvFile)
+#   writer.writerows(accuracy_list)
+# csvFile.close()
 
 # prediction (headers,feature_length,csv_file_test_image,file_name_random_forest,file_name_kmeans,number_of_clusters,search_cost,capacity)
 # prediction (feature_length=feature_length,test_data_location=csv_file_test_image,file_name_random_forest=file_name_random_forest,file_name_kmeans=file_name_kmeans,search_cost=search_cost,capacity=max_cost,selected_columns=selected_columns)
@@ -1286,7 +1307,6 @@ def random_forest_chunks(headers, feature_length, csv_file_location, file_name):
     print(feature_header)
 
     return slf,feature_header"""
-
 
 
 
