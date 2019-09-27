@@ -931,8 +931,8 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
                   selected_columns, image_array, save_location_picture):
     forest_model = pickle.load(open(file_name_random_forest, 'rb'))
     kmeans_model = pickle.load(open(file_name_kmeans, 'rb'))
-    best_numbers = np.zeros(3)
-    time_track = np.zeros(2)
+    best_numbers = np.zeros(4)
+    time_track = np.zeros(3)
     list_cost = []
     ###parameter for pareto optimal
     max_limit_pareto = np.amax(search_cost) * 0.1
@@ -979,6 +979,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             time_greedy_start = time.time()
             solution_greedy = greedy_mine(N=N, weight_cost=list_for_prioritization)
             time_greedy_end = time.time()
+            time_search_start = time.time()
+            solution_search = ranking_mine(N=N, weight_cost=list_for_prioritization)
+            time_search_end = time.time()
             print('greedy over')
             # time_fptas_start = time.time()
             # weights_fptas = [cost for cost in actual_cost]
@@ -997,9 +1000,9 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             solution_average = average_ranking(list_prioritizatoin=list_for_prioritization, N=N)
             time_ranking_end = time.time()
             ### first greedy, then fptas then ranking, then pareto
-            best_numbers = np.array([solution_greedy[0], solution_average[0], solution_pareto[0]])
+            best_numbers = np.array([solution_greedy[0], solution_average[0], solution_pareto[0],solution_search[0]])
             time_track += np.array([time_greedy_end - time_greedy_start,
-                                    time_ranking_end - time_ranking_start])
+                                    time_ranking_end - time_ranking_start,time_search_start-time_search_end])
             list_cost.append(np.copy(best_numbers))
 
     ##plotting
@@ -1009,17 +1012,18 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     print(np.size(list_cost), np.size(y), list_cost, y)
     save_location_picture_N = save_location_picture + "N_no_Average.png"
     save_location_picture_average = save_location_picture + "N_average.png"
-    plt.figure()
+    plt.figure(figsize=(10,10))
     ###greedy
-    plt.plot(np.sort(list_cost[:, 0]), y, label='greedy')
+    plt.plot(np.sort(list_cost[:, 0]), y, label='Greedy Approach')
     ####ranking
-    plt.plot(np.sort(list_cost[:, 1]), y, label='ranking_average')
+    plt.plot(np.sort(list_cost[:, 1]), y, label='Average Ranking')
     ####pareto
     plt.plot(np.sort(list_cost[:, 2]), y, label='pareto optimal')
+    plt.plot(np.sort(list_cost[:, 3]), y, label='Search cost ranking')
     # plt.plot(list_cost[:, 3], y, label='FPTAS')
     plt.xlabel('Search Cost')
     plt.ylabel('Percentage of test images')
-    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}'.format(time_track[0], time_track[1]))
+    plt.title('Greedy time={:10.2f},Ranking_time={:10.2f}, Search_time = {:10.2f}'.format(time_track[0], time_track[1]),time_track[2])
     plt.legend()
     plt.savefig(save_location_picture_N)
     plt.close()
@@ -1028,7 +1032,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
     average_divide = np.divide(list_cost[:, 1], list_cost[:, 2])
     plt.plot(greedy_divide, y, label='greedy')
     plt.plot(average_divide, y, label='ranking_average')
-    plt.xlabel('Capacity/pareto optimal capavity')
+    plt.xlabel('Capacity/pareto optimal capacity')
     plt.ylabel('Percentage of test images')
     plt.legend()
     plt.savefig(save_location_picture_average)
@@ -1407,6 +1411,38 @@ def greedy_mine(N, weight_cost):
     print("you fucked up")
 
     return solutions
+
+def ranking_mine(N, weight_cost):
+    # input cost,prob
+    ratios = [(index, item[0]) for index, item in enumerate(weight_cost)]
+    # ranking_prob = [(index, item[1]) for index, item in enumerate(list_prioritizatoin)]
+    ratios = np.array(sorted(ratios, key=lambda x: x[1], reverse=False))
+    # ranking_prob = np.array(sorted(ranking_prob, key=lambda x: x[1], reverse=False))
+    best_comb = []
+    number_of_points = len(weight_cost)
+    N = np.array(N)
+    N = np.where(N >= number_of_points, number_of_points, N)
+    counter_for_N = 0
+    first_N = N[counter_for_N]
+    final_element = N[-1]
+    solutions = []
+
+    best_cost = 0
+    for i in range(number_of_points):
+        index = ratios[i][0]
+        best_cost += weight_cost[index][0]
+        if i + 1 == first_N:
+            for k in range(len(np.where(N == first_N)[0])):
+                solutions.append(best_cost)
+                counter_for_N += 1
+            if first_N == final_element:
+                return solutions
+            else:
+                first_N = N[counter_for_N]
+    print("you fucked up")
+
+    return solutions
+
 
 
 def handle_data_for_test_image(positive, feature_length, csv_file_location_kmeans):
