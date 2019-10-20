@@ -872,7 +872,7 @@ def ratio_test(headers, selected_colums, data_frame, k_means_model):
 
 
 def fptas(values, weights, n_items, capacity, scaling_factor):
-    # scaling_factor = (correctness* n_items)/max_cost
+    # scaling_factor = (correctness* max_cost)/n_items
     new_capacity = int(float(capacity) / scaling_factor)
     new_weight_cost = [int(round(float(weight) / scaling_factor)) for weight in weights]
 
@@ -1002,7 +1002,7 @@ def final_predict(feature_length, file_name_random_forest, file_name_kmeans, sea
             ### first greedy, then fptas then ranking, then pareto
             best_numbers = np.array([solution_greedy[0], solution_average[0], solution_pareto[0],solution_search[0]])
             time_track += np.array([time_greedy_end - time_greedy_start,
-                                    time_ranking_end - time_ranking_start,time_search_start-time_search_end])
+                                    time_ranking_end - time_ranking_start,time_search_end-time_search_start])
             list_cost.append(np.copy(best_numbers))
 
     ##plotting
